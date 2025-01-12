@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Folders
+/build/
+
 # Object files
 *.o
 *.ko
