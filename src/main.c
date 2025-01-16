@@ -28,30 +28,80 @@
 #define TITLE "Physics Simulator"
 #define FPS 144
 
+SDL_Window* window;
+
+SDL_Renderer* renderer;
+
+VENG_Driver driver;
+
 // main loop
 int main (int argc, char* argv[])
 {
-	VENG_Screen main_screen = VENG_Screen_Create(TITLE, LoadPNG("res/Icon.png"), VENG_Layout_Create(HORIZONTAL, LEFT, TOP, NULL, 2));
-	VENG_Element** main_screen_elements = IS_NULL(calloc(2, sizeof(VENG_Element*)));
+	if (IMG_Init(IMG_INIT_PNG) == 0)
+	{
+		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
+		exit(-1);
+	}
 
-		VENG_Element canvas = VENG_Element_Create(0.4f, 0.3f, true, true, VENG_Layout_Create(HORIZONTAL, LEFT, TOP, NULL, 0));
-		main_screen_elements[0] = &canvas;
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+	{
+		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
+		exit(-1);	
+	}
 
-		VENG_Element tool_box = VENG_Element_Create(0.3f, 0.3f, true, true, VENG_Layout_Create(HORIZONTAL, RIGHT, BOTTOM, NULL, 2));
+	window = SDL_CreateWindow("VENG", SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED,
+						1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+	if (window == NULL)
+	{
+		printf("The system has failed to initialize the window: %s\n", SDL_GetError());
+		SDL_Quit();
+		exit(-1);
+	}
+
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+	if (renderer == NULL)
+	{
+		printf("The system has failed to initialize the window: %s\n", SDL_GetError());
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		exit(-1);
+	}
+
+	driver = (VENG_Driver){window, renderer};
+
+	// Screen design
+	VENG_Screen main_screen;
+		VENG_Element** main_screen_elements = IS_NULL(calloc(2, sizeof(VENG_Element*)));
 		
+		VENG_Element canvas;
+			main_screen_elements[0] = &canvas;
+
+		VENG_Element tool_box;
+			main_screen_elements[1] = &tool_box;
+
 			VENG_Element** main_screen_tb_e = IS_NULL(calloc(2, sizeof(VENG_Element*)));
-			tool_box.layout.sub_elements = main_screen_tb_e;
-				VENG_Element box1 = VENG_Element_Create(0.2f, 0.3f, true, true, VENG_Layout_Create(HORIZONTAL, LEFT, TOP, NULL, 0));
+
+			VENG_Element box1;
 				main_screen_tb_e[0] = &box1;
 
-				VENG_Element box2 = VENG_Element_Create(0.2f, 0.2f, true, true, VENG_Layout_Create(HORIZONTAL, LEFT, TOP, NULL, 0));
+			VENG_Element box2;
 				main_screen_tb_e[1] = &box2;
-		main_screen_elements[1] = &tool_box;
-		
-		
-	main_screen.layout.sub_elements = main_screen_elements;
 
-	VENG_Init(&main_screen);
+
+	main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(HORIZONTAL, LEFT, TOP, main_screen_elements, 2));
+
+	canvas = VENG_CreateElement(0.4f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+
+	tool_box = VENG_CreateElement(0.3f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, RIGHT, BOTTOM, main_screen_tb_e, 2));
+
+	box1 = VENG_CreateElement(0.2f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+
+	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+
+
+	VENG_Init(driver);
+	VENG_SetScreen(&main_screen);
 
 	SDL_Event event;
 	int close_requested = 0;
@@ -69,25 +119,25 @@ int main (int argc, char* argv[])
 			}
 		}
 		
-		SDL_RenderClear(VENG_GetRenderer());
+		SDL_RenderClear(renderer);
 
 		VENG_PrepareElements();
 		
-		SDL_GetRendererOutputSize(VENG_GetRenderer(), &w, &h);
+		SDL_GetRendererOutputSize(renderer, &w, &h);
 
-		SDL_SetRenderDrawColor(VENG_GetRenderer(), 255, 255, 255, 255);
-		SDL_RenderFillRect(VENG_GetRenderer(), &canvas.rect);
-		SDL_SetRenderDrawColor(VENG_GetRenderer(), 100, 255, 255, 255);
-		SDL_RenderFillRect(VENG_GetRenderer(), &tool_box.rect);
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderFillRect(renderer, &canvas.rect);
+		SDL_SetRenderDrawColor(renderer, 100, 255, 255, 255);
+		SDL_RenderFillRect(renderer, &tool_box.rect);
 	
-		SDL_SetRenderDrawColor(VENG_GetRenderer(), 232, 18, 104, 255);
-		SDL_RenderFillRect(VENG_GetRenderer(), &box1.rect);
-		SDL_SetRenderDrawColor(VENG_GetRenderer(), 255, 128, 54, 255);
-		SDL_RenderFillRect(VENG_GetRenderer(), &box2.rect);
+		SDL_SetRenderDrawColor(renderer, 232, 18, 104, 255);
+		SDL_RenderFillRect(renderer, &box1.rect);
+		SDL_SetRenderDrawColor(renderer, 255, 128, 54, 255);
+		SDL_RenderFillRect(renderer, &box2.rect);
 	
-		SDL_SetRenderDrawColor(VENG_GetRenderer(), 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-		SDL_RenderPresent(VENG_GetRenderer());
+		SDL_RenderPresent(renderer);
 		
 		// FPS management
 		int time = (1000 / FPS) - (SDL_GetTicks64() - time0);
@@ -99,5 +149,5 @@ int main (int argc, char* argv[])
 
 		time0 = SDL_GetTicks64();
 	}
-	VENG_Destroy();
+	VENG_Destroy(true);
 }
