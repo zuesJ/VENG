@@ -29,11 +29,12 @@ $(OUTPUT_PATH): src/main.c src/VENG.c src/VENG.h
 	$(CC) -static $(BUILD_DIR)/main.o $(BUILD_DIR)/VENG.o -o $(OUTPUT_PATH) $(WinMain) $(LIBS) $(SDL2) $(SDL2_DEPENDENCIES)
 
 create_build_dir:
-	@echo "Making build directory . . ."
+	@if not exist "$(BUILD_DIR)" echo "Making build directory . . ."
 	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
 clean:
 	@echo "Cleaning build. . ."
 	@if exist "$(BUILD_DIR)" rd /s /q "$(BUILD_DIR)"
+	@if exist "$(OUTPUT_NAME)" del "$(OUTPUT_NAME)"
 	
 
