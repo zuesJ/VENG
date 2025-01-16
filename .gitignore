@@ -3,6 +3,7 @@
 
 # Folders
 /build/
+/res/
 
 # Object files
 *.o

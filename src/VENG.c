@@ -1,0 +1,320 @@
+// Standard libs
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <math.h>
+
+// Debuging tools
+//#define NDEBUG // Delete the comment to prevent assert() from checking.
+#include <assert.h>
+
+// Checking tools
+#define IS_NULL(ptr) ((ptr) != NULL ? (ptr) : (printf("Pointer %s is NULL in line %d, %s.\n", #ptr, __LINE__, __FILE__), exit(1), NULL))
+
+// SDL2 lib
+//#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
+#include <SDL2_image/SDL_image.h>
+
+#include "VENG.h"
+
+SDL_Window* window;
+SDL_Renderer* renderer;
+
+VENG_Screen* rendering_screen;
+
+void VENG_Init (VENG_Screen* start_screen) // Passing pointer to avoid the structure to be duplicated
+{
+	if (IMG_Init(IMG_INIT_PNG) == 0)
+	{
+		printf("The system has failed to initialize the image subsystem: %s\n", SDL_GetError());
+		exit(-1);
+	}
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+	{
+		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
+		exit(-1);	
+	}
+	window = SDL_CreateWindow("VENG", SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED,
+						1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+	if (window == NULL)
+	{
+		printf("The system has failed to initialize the window: %s\n", SDL_GetError());
+		SDL_Quit();
+		exit(-1);
+	}
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (window == NULL)
+	{
+		printf("The system has failed to initialize the renderer: %s\n", SDL_GetError());
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		exit(-1);
+	}
+	VENG_SetScreen(start_screen);
+}
+
+void VENG_Destroy ()
+{
+	IMG_Quit();
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+}
+
+VENG_Layout VENG_Layout_Create(uint8_t arrangement, uint8_t align_horizontal, uint8_t align_vertical, VENG_Element** sub_elements, size_t sub_elements_size)
+{
+	VENG_Layout layout;
+	layout.arrangement = arrangement;
+	layout.align_horizontal = align_horizontal;
+	layout.align_vertical = align_vertical;
+	layout.sub_elements = sub_elements;
+	layout.sub_elements_size = sub_elements_size;
+	return layout;
+}
+
+VENG_Screen VENG_Screen_Create(char* title, SDL_Surface* icon, VENG_Layout layout)
+{
+	VENG_Screen screen;
+	screen.type = TYPE_SCREEN;
+	screen.title = title;
+	screen.icon = icon;
+	screen.layout = layout;
+	return screen;
+}
+
+VENG_Element VENG_Element_Create(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
+{
+	VENG_Element element;
+	element.type = TYPE_ELEMENT;
+	element.w = w;
+	element.h = h;
+	element.stretch_size = stretch_size;
+	element.visible = visible;
+	element.layout = layout;
+	return element;
+}
+
+SDL_Surface* LoadPNG (const char* path)
+{
+	SDL_Surface* surface = IMG_Load(path);
+	if (surface == NULL)
+	{
+		printf("Failed to load the PNG image: %s\n", IMG_GetError());
+		return NULL;
+	}
+	return surface;
+}
+
+void VENG_SetScreen(VENG_Screen* screen)
+{
+	if (screen == NULL)
+	{
+		return;
+	}
+	rendering_screen = screen;
+	if (screen->icon != NULL)
+	{
+		SDL_SetWindowIcon(window, screen->icon);
+	}
+	SDL_SetWindowTitle(window, screen->title);
+}
+
+void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect)
+{
+	if (!element->visible)
+	{
+		// Sets the rect with -1 to avoid SDL to render the element
+		element->rect = (SDL_Rect){-1, -1, -1, -1};
+		return;
+	}
+
+	// Detect if the parent_container is a Screen* or an Element*
+	VENG_ParentType type = ((VENG_Screen*)parent_container)->type;
+	VENG_Layout* layout;
+	if (type == TYPE_SCREEN)
+	{
+		layout = &((VENG_Screen*)parent_container)->layout;
+	}
+	else
+	{
+		layout = &((VENG_Element*) parent_container)->layout;
+	}
+	
+
+	// Compute Size
+	float screen_ratio = (float)drawing_rect.w / drawing_rect.h;
+	if (element->stretch_size)
+	{
+		element->rect.w = round(element->w * drawing_rect.w);
+		element->rect.h = round(element->h * drawing_rect.h);
+	}
+	else
+	{
+		if (screen_ratio >= 1.0f)	
+		{
+			element->rect.w = round(element->w * drawing_rect.h);
+			element->rect.h = round(element->h * drawing_rect.h);
+		}
+		else
+		{
+			element->rect.w = round(element->w * drawing_rect.w);
+			element->rect.h = round(element->h * drawing_rect.w);
+		}
+	}
+
+	// Compute coords
+	SDL_Point offset = (SDL_Point){0, 0};
+	for (int i = 0; i < layout->sub_elements_size; i++)
+	{
+		if (layout->sub_elements[i] == element)
+		{
+			break;
+		}
+		if (element->stretch_size)
+		{
+			offset.x += round(element->w * drawing_rect.w);
+			offset.y += round(element->h * drawing_rect.h);
+		}
+		else
+		{
+			if (screen_ratio >= 1.0f)	
+			{
+				offset.x += round(element->w * drawing_rect.h);
+				offset.y += round(element->h * drawing_rect.h);
+			}
+			else
+			{
+				offset.x += round(element->w * drawing_rect.w);
+				offset.y += round(element->h * drawing_rect.w);
+			}
+		}
+	}
+	// Set the coords
+	if (layout->arrangement == HORIZONTAL)
+	{
+		switch (layout->align_horizontal)
+		{
+			case LEFT:
+				element->rect.x = drawing_rect.x + offset.x;
+				break;
+			case CENTER:
+				element->rect.x = drawing_rect.x + round((drawing_rect.w - element->rect.w)/2); // some offset
+				break;
+			case RIGHT:
+				element->rect.x = drawing_rect.x + drawing_rect.w - element->rect.w - offset.x;
+				break;
+			default:
+				printf("Invalid align_h argument.");
+				exit(-1);
+		}
+		switch (layout->align_vertical)
+		{
+			case TOP:
+				element->rect.y = drawing_rect.y;
+				break;
+			case CENTER:
+				element->rect.y = drawing_rect.y + round((drawing_rect.h - element->rect.h)/2);
+				break;
+			case BOTTOM:
+				element->rect.y = drawing_rect.y + drawing_rect.h - element->rect.h;
+				break;
+			default:
+				printf("Invalid align_v argument.");
+				exit(-1);
+		}
+	}
+	else if (layout->arrangement == VERTICAL)
+	{
+		switch (layout->align_horizontal)
+		{
+			case LEFT:
+				element->rect.x = drawing_rect.x;
+				break;
+			case CENTER:
+				element->rect.x = drawing_rect.x + round((drawing_rect.w - element->rect.w)/2);
+				break;
+			case RIGHT:
+				element->rect.x = drawing_rect.x + drawing_rect.w - element->rect.w;
+				break;
+			default:
+				printf("Invalid align_h argument.");
+				exit(-1);
+		}
+		switch (layout->align_vertical)
+		{
+			case TOP:
+				element->rect.y = drawing_rect.y + offset.y;
+				break;
+			case CENTER:
+				element->rect.y = drawing_rect.y + round((drawing_rect.h - element->rect.h)/2); // + some h offset
+				break;
+			case BOTTOM:
+				element->rect.y = drawing_rect.y + drawing_rect.h - element->rect.h - offset.y;
+				break;
+			default:
+				printf("Invalid align_v argument.");
+				exit(-1);
+		}
+	}
+	else
+	{
+		printf("Invalid arrangement argument.");
+		exit(-1);
+	}
+
+	// Check for sub-elements
+
+	if (element->layout.sub_elements != NULL)
+	{
+		for (int i = 0; i < element->layout.sub_elements_size; i++)
+		{
+			if (element->layout.sub_elements[i] != NULL)
+			{
+				VENG_PrepareElement(element->layout.sub_elements[i], element, element->rect);
+			}
+
+		}
+	}
+}
+
+void VENG_PrepareElements()
+{
+	if (rendering_screen == NULL)
+	{
+		return;
+	}
+	if (rendering_screen->layout.sub_elements == NULL)
+	{
+		return;
+	}
+
+	int window_w;
+	int window_h;
+	SDL_GetRendererOutputSize(renderer, &window_w, &window_h);
+	
+	for (int i = 0; i < rendering_screen->layout.sub_elements_size; i++)
+	{
+		if (rendering_screen->layout.sub_elements[i] != NULL)
+		{
+			VENG_PrepareElement(rendering_screen->layout.sub_elements[i], rendering_screen, (SDL_Rect){0, 0, window_w, window_h});
+		}
+	}
+}
+
+VENG_Screen* VENG_GetScreen()
+{
+	return rendering_screen;
+}
+
+SDL_Window* VENG_GetWindow()
+{
+	return window;
+}
+
+SDL_Renderer* VENG_GetRenderer()
+{
+	return renderer;
+}
