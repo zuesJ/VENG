@@ -20,16 +20,15 @@
 
 #include "VENG.h"
 
-SDL_Window* window;
-SDL_Renderer* renderer;
+static VENG_Driver driver;
 
-VENG_Screen* rendering_screen;
+static VENG_Screen* rendering_screen;
 
-void VENG_Init (VENG_Screen* start_screen) // Passing pointer to avoid the structure to be duplicated
+void VENG_Init (VENG_Driver new_driver)
 {
 	if (IMG_Init(IMG_INIT_PNG) == 0)
 	{
-		printf("The system has failed to initialize the image subsystem: %s\n", SDL_GetError());
+		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
 		exit(-1);
 	}
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -37,34 +36,22 @@ void VENG_Init (VENG_Screen* start_screen) // Passing pointer to avoid the struc
 		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
 		exit(-1);	
 	}
-	window = SDL_CreateWindow("VENG", SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED,
-						1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
-	if (window == NULL)
-	{
-		printf("The system has failed to initialize the window: %s\n", SDL_GetError());
-		SDL_Quit();
-		exit(-1);
-	}
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (window == NULL)
-	{
-		printf("The system has failed to initialize the renderer: %s\n", SDL_GetError());
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-		exit(-1);
-	}
-	VENG_SetScreen(start_screen);
+	driver = new_driver;
 }
 
-void VENG_Destroy ()
+void VENG_Destroy (bool closeSDL)
 {
-	IMG_Quit();
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	driver = (VENG_Driver){NULL, NULL};
+	if (closeSDL)
+	{
+		IMG_Quit();
+		SDL_DestroyRenderer(driver.renderer);
+		SDL_DestroyWindow(driver.window);
+		SDL_Quit();
+	}
 }
 
-VENG_Layout VENG_Layout_Create(uint8_t arrangement, uint8_t align_horizontal, uint8_t align_vertical, VENG_Element** sub_elements, size_t sub_elements_size)
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, VENG_Element** sub_elements, size_t sub_elements_size)
 {
 	VENG_Layout layout;
 	layout.arrangement = arrangement;
@@ -75,7 +62,7 @@ VENG_Layout VENG_Layout_Create(uint8_t arrangement, uint8_t align_horizontal, ui
 	return layout;
 }
 
-VENG_Screen VENG_Screen_Create(char* title, SDL_Surface* icon, VENG_Layout layout)
+VENG_Screen VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout)
 {
 	VENG_Screen screen;
 	screen.type = TYPE_SCREEN;
@@ -85,7 +72,7 @@ VENG_Screen VENG_Screen_Create(char* title, SDL_Surface* icon, VENG_Layout layou
 	return screen;
 }
 
-VENG_Element VENG_Element_Create(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
+VENG_Element VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
 {
 	VENG_Element element;
 	element.type = TYPE_ELEMENT;
@@ -97,7 +84,7 @@ VENG_Element VENG_Element_Create(float w, float h, bool stretch_size, bool visib
 	return element;
 }
 
-SDL_Surface* LoadPNG (const char* path)
+SDL_Surface* VENG_LoadPNG (const char* path)
 {
 	SDL_Surface* surface = IMG_Load(path);
 	if (surface == NULL)
@@ -117,9 +104,9 @@ void VENG_SetScreen(VENG_Screen* screen)
 	rendering_screen = screen;
 	if (screen->icon != NULL)
 	{
-		SDL_SetWindowIcon(window, screen->icon);
+		SDL_SetWindowIcon(driver.window, screen->icon);
 	}
-	SDL_SetWindowTitle(window, screen->title);
+	SDL_SetWindowTitle(driver.window, screen->title);
 }
 
 void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect)
@@ -293,7 +280,7 @@ void VENG_PrepareElements()
 
 	int window_w;
 	int window_h;
-	SDL_GetRendererOutputSize(renderer, &window_w, &window_h);
+	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
 	
 	for (int i = 0; i < rendering_screen->layout.sub_elements_size; i++)
 	{
@@ -309,12 +296,20 @@ VENG_Screen* VENG_GetScreen()
 	return rendering_screen;
 }
 
-SDL_Window* VENG_GetWindow()
+VENG_Driver VENG_GetDriver ()
 {
-	return window;
+	return driver;
 }
 
-SDL_Renderer* VENG_GetRenderer()
+VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 {
-	return renderer;
+	VENG_Driver driver;
+	driver.window = window;
+	driver.renderer = renderer;
+	return driver;
+}
+
+void VENG_SetDriver(VENG_Driver new_driver)
+{
+	driver = new_driver;
 }
