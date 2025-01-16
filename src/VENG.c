@@ -1,4 +1,3 @@
-// Standard libs
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -9,11 +8,10 @@
 //#define NDEBUG // Delete the comment to prevent assert() from checking.
 #include <assert.h>
 
-// Checking tools
+// Pointer safety macro
 #define IS_NULL(ptr) ((ptr) != NULL ? (ptr) : (printf("Pointer %s is NULL in line %d, %s.\n", #ptr, __LINE__, __FILE__), exit(1), NULL))
 
 // SDL2 lib
-//#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <SDL2_image/SDL_image.h>
@@ -21,7 +19,6 @@
 #include "VENG.h"
 
 static VENG_Driver driver;
-
 static VENG_Screen* rendering_screen;
 
 void VENG_Init (VENG_Driver new_driver)
