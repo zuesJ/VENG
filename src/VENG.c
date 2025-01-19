@@ -13,7 +13,6 @@
 
 // SDL2 lib
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_main.h>
 #include <SDL2_image/SDL_image.h>
 
 #include "VENG.h"
@@ -79,17 +78,6 @@ VENG_Element VENG_CreateElement(float w, float h, bool stretch_size, bool visibl
 	element.visible = visible;
 	element.layout = layout;
 	return element;
-}
-
-SDL_Surface* VENG_LoadPNG (const char* path)
-{
-	SDL_Surface* surface = IMG_Load(path);
-	if (surface == NULL)
-	{
-		printf("Failed to load the PNG image: %s\n", IMG_GetError());
-		return NULL;
-	}
-	return surface;
 }
 
 void VENG_SetScreen(VENG_Screen* screen)
