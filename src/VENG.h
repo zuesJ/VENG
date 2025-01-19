@@ -1,29 +1,50 @@
+/*==========================================================================*\
+ *                           VENG.h - VENG Library Header
+ * ===========================================================================
+ * This header contains all the function declarations and type definitions
+ * required for the VENG library. It acts as the primary interface to access
+ * GUI management functionality within SDL.
+ *
+ * MIT License:
+ * Copyright (c) 2025 Daniel García
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+\*==========================================================================*/
+
 #ifndef VENG_H
 #define VENG_H
 
-/* ******************************************************
-*
-*			Structs
-*
-*			Enums
-*
-* *******************************************************/
+#include <stdbool.h>
 
-// Forward declaration
+/*==========================================================================*\
+ *                   VENG.c - Core Functions, structs & enums
+\*==========================================================================*/
 
 typedef enum VENG_ParentType VENG_ParentType;
 typedef enum VENG_Arrangement VENG_Arrangement;
 typedef enum VENG_Align VENG_Align;
 
+typedef struct VENG_Driver VENG_Driver;
 typedef struct VENG_Screen VENG_Screen;
 typedef struct VENG_Element VENG_Element;
 typedef struct VENG_Layout VENG_Layout;
-
-typedef struct VENG_Driver
-{
-	SDL_Window* window;
-	SDL_Renderer* renderer;
-} VENG_Driver;
 
 typedef enum VENG_ParentType
 {
@@ -45,6 +66,12 @@ typedef enum VENG_Align
 	RIGHT,
 	BOTTOM
 } VENG_Align;
+
+typedef struct VENG_Driver
+{
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+} VENG_Driver;
 
 typedef struct VENG_Layout
 {
@@ -79,10 +106,6 @@ typedef struct VENG_Element
 	VENG_Layout layout;
 } VENG_Element;
 
-// Listeners
-
-
-// VENG core functions
 /*
 * Creates a layout
 * Parameters: All the Layout's fields
@@ -113,12 +136,6 @@ VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer);
 * Paramters: A VENG_Driver
 */
 void VENG_SetDriver(VENG_Driver driver);
-
-/*
-* Loads a PNG into a SDL_Surface
-* Parameters: the PNG's path
-*/
-SDL_Surface* VENG_LoadPNG (const char* path);
 
 /*
 * Sets a screen as the current rendering screen
@@ -162,5 +179,48 @@ VENG_Screen* VENG_GetScreen();
 * Parameters: none
 */
 VENG_Driver VENG_GetDriver();
+
+
+/*==========================================================================*\
+ *                    VENG_listeners.c - Input management
+\*==========================================================================*/
+
+typedef void (*VENG_ListenerCallback)(SDL_Event event);
+
+typedef struct VENG_MouseListener VENG_MouseListener;
+typedef struct VENG_MouseTrigger VENG_MouseTrigger;
+
+typedef struct VENG_MouseTrigger
+{
+	bool m_motion;
+	bool m_button_down;
+	bool m_button_up;
+	bool m_wheel;
+} VENG_MouseTrigger;
+
+typedef struct VENG_MouseListener
+{
+	VENG_Element* element;
+	VENG_ListenerCallback on_call;
+	VENG_MouseTrigger m_trigger;
+} VENG_MouseListener;
+
+void VENG_Listen(SDL_Event event);
+
+VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, bool m_button_up, bool m_wheel);
+
+void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call, VENG_MouseTrigger m_trigger);
+
+
+/*==========================================================================*\
+ *          VENG_tools.c - Useful functions for SDL & VENG development
+\*==========================================================================*/
+
+/*
+* Loads a PNG into a SDL_Surface
+* Parameters: the PNG's path
+*/
+SDL_Surface* VENG_LoadPNG (const char* path);
+
 
 #endif
