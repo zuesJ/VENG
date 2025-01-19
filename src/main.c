@@ -99,6 +99,7 @@ int main (int argc, char* argv[])
 
 	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
 
+	VENG_AddMouseListener(&box2, box2_on_click, VENG_createMouseTrigger(false, true, true, false));
 
 	VENG_Init(driver);
 	VENG_SetScreen(&main_screen);
@@ -112,10 +113,13 @@ int main (int argc, char* argv[])
 	while(!close_requested)
 	{
 		while (SDL_PollEvent(&event)) // Retrieve events
-		{
-			if (event.type == SDL_QUIT)
+		{	
+			VENG_Listen(event);
+			switch (event.type)
 			{
-				close_requested = 1;
+				case SDL_QUIT:
+					close_requested = 1;
+					break;
 			}
 		}
 		
