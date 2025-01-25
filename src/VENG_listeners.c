@@ -31,19 +31,19 @@ void static check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* even
 {
 	if (event->type == SDL_MOUSEMOTION && m_listener->m_trigger.m_motion)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(*event) : printf("Not motioning, sorry.\n");
+		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
 	}
 	else if (event->type == SDL_MOUSEBUTTONDOWN && m_listener->m_trigger.m_button_down)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(*event) : printf("Not downing, sorry.\n");
+		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
 	}
 	else if (event->type == SDL_MOUSEBUTTONUP && m_listener->m_trigger.m_button_up)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(*event) : printf("Not uping, sorry.\n");
+		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
 	}
 	else if (event->type == SDL_MOUSEWHEEL && m_listener->m_trigger.m_wheel)
 	{
-		point_is_on_rect(event->wheel.mouseX, event->wheel.mouseY, m_listener->element->rect) ? m_listener->on_call(*event) : printf("Not wheeling, sorry.\n");
+		point_is_on_rect(event->wheel.mouseX, event->wheel.mouseY, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
 	}
 }
 

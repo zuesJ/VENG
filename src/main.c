@@ -99,7 +99,8 @@ int main (int argc, char* argv[])
 
 	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
 
-	VENG_AddMouseListener(&box2, box2_on_click, VENG_createMouseTrigger(false, true, true, false));
+	VENG_AddMouseListener(&box2, box2_on_click, VENG_createMouseTrigger(false, false, true, false));
+	VENG_AddMouseListener(&tool_box, tool_box_on_click, VENG_createMouseTrigger(false, true, false, false));
 
 	VENG_Init(driver);
 	VENG_SetScreen(&main_screen);
@@ -122,23 +123,27 @@ int main (int argc, char* argv[])
 					break;
 			}
 		}
-		
+
 		SDL_RenderClear(renderer);
 
 		VENG_PrepareElements();
-		
+
 		SDL_GetRendererOutputSize(renderer, &w, &h);
 
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderFillRect(renderer, &canvas.rect);
+		if (palanquisima)
+		{
+			fill_a_rect_with_orange(&canvas);
+		}
+		
 		SDL_SetRenderDrawColor(renderer, 100, 255, 255, 255);
 		SDL_RenderFillRect(renderer, &tool_box.rect);
 	
 		SDL_SetRenderDrawColor(renderer, 232, 18, 104, 255);
 		SDL_RenderFillRect(renderer, &box1.rect);
+	
 		SDL_SetRenderDrawColor(renderer, 255, 128, 54, 255);
 		SDL_RenderFillRect(renderer, &box2.rect);
-	
+
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
 		SDL_RenderPresent(renderer);

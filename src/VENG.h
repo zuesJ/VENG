@@ -107,6 +107,19 @@ typedef struct VENG_Element
 } VENG_Element;
 
 /*
+* Start drawing on an element, this sets the viewport to the element area
+* Parameters: an element pointer
+* Returns the drawing area
+*/
+SDL_Rect VENG_StartDrawing(VENG_Element* element);
+
+/*
+* Stops drawing on an element, this sets the viewport to the default value or to a desired SDL_Rect
+* Parameters: an SDL_Rect pointer, if the pointer is null, it will set the viewport as the default screen dimentions
+*/
+void VENG_StopDrawing(SDL_Rect* viewport);
+
+/*
 * Creates a layout
 * Parameters: All the Layout's fields
 */
@@ -185,7 +198,7 @@ VENG_Driver VENG_GetDriver();
  *                    VENG_listeners.c - Input management
 \*==========================================================================*/
 
-typedef void (*VENG_ListenerCallback)(SDL_Event event);
+typedef void (*VENG_ListenerCallback)(VENG_Element* element, SDL_Event* event);
 
 typedef struct VENG_MouseListener VENG_MouseListener;
 typedef struct VENG_MouseTrigger VENG_MouseTrigger;
@@ -219,6 +232,8 @@ void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call,
 /*
 * Loads a PNG into a SDL_Surface
 * Parameters: the PNG's path
+* Notes: acts as a wrapper for Load_IMG (in SDL_Image)
+* 	 If the path doesn't lead to any image, it will print a alert msg
 */
 SDL_Surface* VENG_LoadPNG (const char* path);
 

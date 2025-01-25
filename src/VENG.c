@@ -20,6 +20,19 @@
 static VENG_Driver driver;
 static VENG_Screen* rendering_screen;
 
+SDL_Rect VENG_StartDrawing(VENG_Element* element)
+{
+	SDL_RenderSetViewport(driver.renderer, &element->rect);
+	SDL_Rect drawing_area = (SDL_Rect){0, 0, 0, 0};
+	SDL_GetRendererOutputSize(driver.renderer, &drawing_area.w, &drawing_area.h);
+	return drawing_area;
+}
+
+void VENG_StopDrawing(SDL_Rect* viewport)
+{
+	SDL_RenderSetViewport(driver.renderer, viewport);
+}
+
 void VENG_Init (VENG_Driver new_driver)
 {
 	if (IMG_Init(IMG_INIT_PNG) == 0)

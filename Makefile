@@ -24,7 +24,7 @@ all: create_build_dir $(OUTPUT_PATH)
 
 MODULES = $(BUILD_DIR)/main.o $(BUILD_DIR)/VENG.o $(BUILD_DIR)/VENG_listeners.o $(BUILD_DIR)/VENG_tools.o
 
-$(OUTPUT_PATH): src/main.c src/VENG.c src/VENG_listeners.c src/VENG_tools.c src/VENG.h
+$(OUTPUT_PATH): src/main.c src/main.h src/VENG.c src/VENG_listeners.c src/VENG_tools.c src/VENG.h 
 	$(CC) -c src/VENG.c -o $(BUILD_DIR)/VENG.o $(SDL2) $(LIBS)
 	$(CC) -c src/VENG_listeners.c -o $(BUILD_DIR)/VENG_listeners.o $(SDL2) $(LIBS)
 	$(CC) -c src/VENG_tools.c -o $(BUILD_DIR)/VENG_tools.o $(SDL2) $(LIBS)
