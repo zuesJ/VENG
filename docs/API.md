@@ -15,11 +15,11 @@
 #### To **set up** and **tear down** a **VENG** environment, you need to know a struct and some few functions:
 
 ### `void VENG_Init(VENG_Driver driver)`
-#### **Description**: This function calls every sub-system that VENG needs to work properly
+#### **Description**: This function calls every sub-system that VENG needs to work properly.
 #### **Parameters**: 
 #### **Returns**: 
 #### **Usage**: 
-#### **Notes**: 
+#### **Notes**: It calls SDL_INIT_VIDEO, SDL_INIT_TIMER and IMG_INIT_PNG (from SDL_Image). If one of those subsystems is already active, nothing will happen as SDL keeps track of every subsystem and will prevent a doble initialization of the same subsytem twice.
 
 ### `void VENG_Destroy(bool closeSDL)`
 #### **Description**:
