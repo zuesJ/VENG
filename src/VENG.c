@@ -20,7 +20,10 @@
 static VENG_Driver driver;
 static VENG_Screen* rendering_screen;
 
-SDL_Rect VENG_StartDrawing(VENG_Element* element)
+static SDL_Point last_screen_size;
+static bool any_dirty_element;
+
+inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
 	SDL_RenderSetViewport(driver.renderer, &element->rect);
 	SDL_Rect drawing_area = (SDL_Rect){0, 0, 0, 0};
@@ -28,22 +31,22 @@ SDL_Rect VENG_StartDrawing(VENG_Element* element)
 	return drawing_area;
 }
 
-void VENG_StopDrawing(SDL_Rect* viewport)
+inline void VENG_StopDrawing(SDL_Rect* viewport)
 {
 	SDL_RenderSetViewport(driver.renderer, viewport);
 }
 
-void VENG_Init (VENG_Driver new_driver)
+int VENG_Init (VENG_Driver new_driver)
 {
 	if (IMG_Init(IMG_INIT_PNG) == 0)
 	{
 		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
-		exit(-1);
+		return -1;
 	}
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
-		exit(-1);	
+		return -1;
 	}
 	driver = new_driver;
 }
@@ -105,6 +108,30 @@ void VENG_SetScreen(VENG_Screen* screen)
 		SDL_SetWindowIcon(driver.window, screen->icon);
 	}
 	SDL_SetWindowTitle(driver.window, screen->title);
+}
+
+void VENG_PrepareElements()
+{
+	if (rendering_screen == NULL)
+	{
+		return;
+	}
+	if (rendering_screen->layout.sub_elements == NULL)
+	{
+		return;
+	}
+
+	int window_w;
+	int window_h;
+	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
+
+	for (int i = 0; i < rendering_screen->layout.sub_elements_size; i++)
+	{
+		if (rendering_screen->layout.sub_elements[i] != NULL)
+		{
+			VENG_PrepareElement(rendering_screen->layout.sub_elements[i], rendering_screen, (SDL_Rect){0, 0, window_w, window_h});
+		}
+	}
 }
 
 void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect)
@@ -261,30 +288,6 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 				VENG_PrepareElement(element->layout.sub_elements[i], element, element->rect);
 			}
 
-		}
-	}
-}
-
-void VENG_PrepareElements()
-{
-	if (rendering_screen == NULL)
-	{
-		return;
-	}
-	if (rendering_screen->layout.sub_elements == NULL)
-	{
-		return;
-	}
-
-	int window_w;
-	int window_h;
-	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
-	
-	for (int i = 0; i < rendering_screen->layout.sub_elements_size; i++)
-	{
-		if (rendering_screen->layout.sub_elements[i] != NULL)
-		{
-			VENG_PrepareElement(rendering_screen->layout.sub_elements[i], rendering_screen, (SDL_Rect){0, 0, window_w, window_h});
 		}
 	}
 }

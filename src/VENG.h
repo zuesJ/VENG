@@ -31,6 +31,7 @@
 #ifndef VENG_H
 #define VENG_H
 
+#include <SDL2/SDL.h>
 #include <stdbool.h>
 
 /*==========================================================================*\
@@ -38,13 +39,15 @@
 \*==========================================================================*/
 
 typedef enum VENG_ParentType VENG_ParentType;
+
+typedef struct VENG_Element VENG_Element;
+typedef struct VENG_Layout VENG_Layout;
+
 typedef enum VENG_Arrangement VENG_Arrangement;
 typedef enum VENG_Align VENG_Align;
 
-typedef struct VENG_Driver VENG_Driver;
 typedef struct VENG_Screen VENG_Screen;
-typedef struct VENG_Element VENG_Element;
-typedef struct VENG_Layout VENG_Layout;
+typedef struct VENG_Driver VENG_Driver;
 
 typedef enum VENG_ParentType
 {
@@ -102,22 +105,23 @@ typedef struct VENG_Element
 	
 	bool stretch_size;
 	bool visible;
-	
+
+	bool dirty;
+
 	VENG_Layout layout;
 } VENG_Element;
 
 /*
-* Start drawing on an element, this sets the viewport to the element area
-* Parameters: an element pointer
-* Returns the drawing area
+* Starts the SDL subsystems
+* Parameters: A driver struct
 */
-SDL_Rect VENG_StartDrawing(VENG_Element* element);
+int VENG_Init(VENG_Driver driver);
 
 /*
-* Stops drawing on an element, this sets the viewport to the default value or to a desired SDL_Rect
-* Parameters: an SDL_Rect pointer, if the pointer is null, it will set the viewport as the default screen dimentions
+* Shuts down the SDL subsystems
+* Parameters: closeSDL: if this flag is true, it will also shutdown SDL and SDL_Image
 */
-void VENG_StopDrawing(SDL_Rect* viewport);
+void VENG_Destroy(bool closeSDL);
 
 /*
 * Creates a layout
@@ -157,10 +161,13 @@ void VENG_SetDriver(VENG_Driver driver);
 void VENG_SetScreen(VENG_Screen* screen);
 
 /*
-* Fills the SDL_Rect field of the Element provided and also does the same for its sub-components. Created to be recursive.
-* Parameters: a pointer to the Element, a void pointer to a parent Element* or Screen* and a SDL_Rect where the Element will be drawn,
+* Marks all elements as dirty.
+* If an element is not marked as dirty, the VENG_PrepareElements() will ignore it (for perfomance purposes).
+* VENG will automaticly set an element as dirty if the user changed any field that directly affects how the element is being drawn*.
+	*only works if the user uses a VENG_SetSomeValue function.
+* If the screen is resized, this function will be called automaticly.
 */
-void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect);
+void VENG_RefreshAllElements();
 
 /*
 * Goes through all the Elements in the current screen and fills the SDL_Rect field of each Element according
@@ -170,16 +177,23 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 void VENG_PrepareElements();
 
 /*
-* Starts the SDL subsystems
-* Parameters: A driver struct
+* Fills the SDL_Rect field of the Element provided and also does the same for its sub-components. Created to be recursive.
+* Parameters: a pointer to the Element, a void pointer to a parent Element* or Screen* and a SDL_Rect where the Element will be drawn,
 */
-void VENG_Init(VENG_Driver driver);
+void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect);
 
 /*
-* Shuts down the SDL subsystems
-* Parameters: closeSDL: if this flag is true, it will also shutdown SDL and SDL_Image
+* Start drawing on an element, this sets the viewport to the element area
+* Parameters: an element pointer
+* Returns the drawing area
 */
-void VENG_Destroy(bool closeSDL);
+SDL_Rect VENG_StartDrawing(VENG_Element* element);
+
+/*
+* Stops drawing on an element, this sets the viewport to the default value or to a desired SDL_Rect
+* Parameters: an SDL_Rect pointer, if the pointer is null, it will set the viewport as the default screen dimentions
+*/
+void VENG_StopDrawing(SDL_Rect* viewport);
 
 /*
 * Gets the current screen pointer
@@ -233,7 +247,7 @@ void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call,
 * Loads a PNG into a SDL_Surface
 * Parameters: the PNG's path
 * Notes: acts as a wrapper for Load_IMG (in SDL_Image)
-* 	 If the path doesn't lead to any image, it will print a alert msg
+* 	 If the path doesn't lead to any image, it will print an alert msg
 */
 SDL_Surface* VENG_LoadPNG (const char* path);
 
