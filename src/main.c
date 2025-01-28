@@ -26,7 +26,7 @@
 
 // Settings
 #define TITLE "Physics Simulator"
-#define FPS 144
+#define FPS 1000
 
 SDL_Window* window;
 
@@ -89,15 +89,15 @@ int main (int argc, char* argv[])
 				main_screen_tb_e[1] = &box2;
 
 
-	main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(HORIZONTAL, LEFT, TOP, main_screen_elements, 2));
+	main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_VERTICAL, VENG_LEFT, VENG_TOP, main_screen_elements, 2));
 
-	canvas = VENG_CreateElement(0.4f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+	canvas = VENG_CreateElement(0.4f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
 
-	tool_box = VENG_CreateElement(0.3f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, RIGHT, BOTTOM, main_screen_tb_e, 2));
+	tool_box = VENG_CreateElement(0.3f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_RIGHT, VENG_BOTTOM, main_screen_tb_e, 2));
 
-	box1 = VENG_CreateElement(0.2f, 0.3f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+	box1 = VENG_CreateElement(0.2f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
 
-	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(HORIZONTAL, LEFT, TOP, NULL, 0));
+	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
 
 	VENG_AddMouseListener(&box2, box2_on_click, VENG_createMouseTrigger(false, false, true, false));
 	VENG_AddMouseListener(&tool_box, tool_box_on_click, VENG_createMouseTrigger(false, true, false, false));
@@ -113,6 +113,9 @@ int main (int argc, char* argv[])
 	int h;
 	while(!close_requested)
 	{
+
+		Uint64 start = SDL_GetPerformanceCounter();
+
 		while (SDL_PollEvent(&event)) // Retrieve events
 		{	
 			VENG_Listen(event);
@@ -148,6 +151,12 @@ int main (int argc, char* argv[])
 
 		SDL_RenderPresent(renderer);
 		
+		Uint64 end = SDL_GetPerformanceCounter();
+
+		double elapsed = (double)(end - start) / SDL_GetPerformanceFrequency();
+
+    		printf("Time taken: %f seconds\n", elapsed);
+
 		// FPS management
 		int time = (1000 / FPS) - (SDL_GetTicks64() - time0);
 		if (time < 0)

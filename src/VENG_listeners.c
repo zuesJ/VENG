@@ -13,11 +13,19 @@ static VENG_MouseListener** mouse_listeners;
 static size_t mouse_listeners_size;
 static size_t mouse_listeners_capacity;
 
+static char* keyboard_buffer;
+static size_t keyboard_buffer_size;
+static bool listening_keyboard;
+
 void static check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event);
 bool static point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
 
 void VENG_Listen(SDL_Event event)
 {
+	if (event.type == SDL_TEXTINPUT)
+	{
+		strcat(keyboard_buffer, event.text.text);
+	}
 	for (int i = 0; i < mouse_listeners_size; i++)
 	{
 		if (mouse_listeners[i] != NULL)
@@ -102,17 +110,29 @@ VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, boo
 	return m_trigger;
 }
 
+void VENG_AttachKeyboardBuffer(char* buffer, size_t buffer_size)
+{
+	keyboard_buffer = buffer;
+	keyboard_buffer_size = buffer_size;
+	if (buffer == NULL)
+	{
+		keyboard_buffer_size = 0;
+	}
+}
 
+void VENG_KeyboardStartListening()
+{
+	listening_keyboard = true;
+	SDL_StartTextInput();
+}
 
+void VENG_KeyboardStopListening()
+{
+	listening_keyboard = false;
+	SDL_StopTextInput();
+}
 
-
-
-
-
-
-
-
-
-
-
-
+bool VENG_KeyboardIsListening();
+{
+	return listening_keyboard;
+}

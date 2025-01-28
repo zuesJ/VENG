@@ -20,6 +20,7 @@
 static VENG_Driver driver;
 static VENG_Screen* rendering_screen;
 
+// TO DO
 static SDL_Point last_screen_size;
 static bool any_dirty_element;
 
@@ -54,6 +55,10 @@ int VENG_Init (VENG_Driver new_driver)
 void VENG_Destroy (bool closeSDL)
 {
 	driver = (VENG_Driver){NULL, NULL};
+	rendering_screen = NULL;
+	last_screen_size.x = 0;
+	last_screen_size.y = 0;
+	any_dirty_element = false;
 	if (closeSDL)
 	{
 		IMG_Quit();
@@ -77,7 +82,7 @@ VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_hor
 VENG_Screen VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout)
 {
 	VENG_Screen screen;
-	screen.type = TYPE_SCREEN;
+	screen.type = VENG_TYPE_SCREEN;
 	screen.title = title;
 	screen.icon = icon;
 	screen.layout = layout;
@@ -87,7 +92,7 @@ VENG_Screen VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout
 VENG_Element VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
 {
 	VENG_Element element;
-	element.type = TYPE_ELEMENT;
+	element.type = VENG_TYPE_ELEMENT;
 	element.w = w;
 	element.h = h;
 	element.stretch_size = stretch_size;
@@ -146,7 +151,7 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 	// Detect if the parent_container is a Screen* or an Element*
 	VENG_ParentType type = ((VENG_Screen*)parent_container)->type;
 	VENG_Layout* layout;
-	if (type == TYPE_SCREEN)
+	if (type == VENG_TYPE_SCREEN)
 	{
 		layout = &((VENG_Screen*)parent_container)->layout;
 	}
@@ -205,17 +210,17 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 		}
 	}
 	// Set the coords
-	if (layout->arrangement == HORIZONTAL)
+	if (layout->arrangement == VENG_HORIZONTAL)
 	{
 		switch (layout->align_horizontal)
 		{
-			case LEFT:
+			case VENG_LEFT:
 				element->rect.x = drawing_rect.x + offset.x;
 				break;
-			case CENTER:
+			case VENG_CENTER:
 				element->rect.x = drawing_rect.x + round((drawing_rect.w - element->rect.w)/2); // some offset
 				break;
-			case RIGHT:
+			case VENG_RIGHT:
 				element->rect.x = drawing_rect.x + drawing_rect.w - element->rect.w - offset.x;
 				break;
 			default:
@@ -224,13 +229,13 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 		}
 		switch (layout->align_vertical)
 		{
-			case TOP:
+			case VENG_TOP:
 				element->rect.y = drawing_rect.y;
 				break;
-			case CENTER:
+			case VENG_CENTER:
 				element->rect.y = drawing_rect.y + round((drawing_rect.h - element->rect.h)/2);
 				break;
-			case BOTTOM:
+			case VENG_BOTTOM:
 				element->rect.y = drawing_rect.y + drawing_rect.h - element->rect.h;
 				break;
 			default:
@@ -238,17 +243,17 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 				exit(-1);
 		}
 	}
-	else if (layout->arrangement == VERTICAL)
+	else if (layout->arrangement == VENG_VERTICAL)
 	{
 		switch (layout->align_horizontal)
 		{
-			case LEFT:
+			case VENG_LEFT:
 				element->rect.x = drawing_rect.x;
 				break;
-			case CENTER:
+			case VENG_CENTER:
 				element->rect.x = drawing_rect.x + round((drawing_rect.w - element->rect.w)/2);
 				break;
-			case RIGHT:
+			case VENG_RIGHT:
 				element->rect.x = drawing_rect.x + drawing_rect.w - element->rect.w;
 				break;
 			default:
@@ -257,13 +262,13 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 		}
 		switch (layout->align_vertical)
 		{
-			case TOP:
+			case VENG_TOP:
 				element->rect.y = drawing_rect.y + offset.y;
 				break;
-			case CENTER:
+			case VENG_CENTER:
 				element->rect.y = drawing_rect.y + round((drawing_rect.h - element->rect.h)/2); // + some h offset
 				break;
-			case BOTTOM:
+			case VENG_BOTTOM:
 				element->rect.y = drawing_rect.y + drawing_rect.h - element->rect.h - offset.y;
 				break;
 			default:

@@ -51,23 +51,23 @@ typedef struct VENG_Driver VENG_Driver;
 
 typedef enum VENG_ParentType
 {
-	TYPE_SCREEN,
-	TYPE_ELEMENT
+	VENG_TYPE_SCREEN,
+	VENG_TYPE_ELEMENT
 } VENG_ParentType;
 
 typedef enum VENG_Arrangement
 {
-	HORIZONTAL,
-	VERTICAL
+	VENG_HORIZONTAL,
+	VENG_VERTICAL
 } VENG_Arrangement;
 
 typedef enum VENG_Align
 {
-	LEFT,
-	TOP,
-	CENTER,
-	RIGHT,
-	BOTTOM
+	VENG_LEFT,
+	VENG_TOP,
+	VENG_CENTER,
+	VENG_RIGHT,
+	VENG_BOTTOM
 } VENG_Align;
 
 typedef struct VENG_Driver
@@ -209,7 +209,7 @@ VENG_Driver VENG_GetDriver();
 
 
 /*==========================================================================*\
- *                    VENG_listeners.c - Input management
+ *                    VENG_listeners.c - Input management 
 \*==========================================================================*/
 
 typedef void (*VENG_ListenerCallback)(VENG_Element* element, SDL_Event* event);
@@ -237,6 +237,16 @@ void VENG_Listen(SDL_Event event);
 VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, bool m_button_up, bool m_wheel);
 
 void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call, VENG_MouseTrigger m_trigger);
+
+// Note: Keyboard detection is in a young phase. There are bugs.
+
+void VENG_AttachKeyboardBuffer(char* buffer, size_t buffer_size);
+
+void VENG_KeyboardStartListening();
+
+void VENG_KeyboardStopListening();
+
+bool VENG_KeyboardIsListening();
 
 
 /*==========================================================================*\
