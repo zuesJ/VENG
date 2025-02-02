@@ -132,7 +132,7 @@ void VENG_KeyboardStopListening()
 	SDL_StopTextInput();
 }
 
-bool VENG_KeyboardIsListening();
+bool VENG_KeyboardIsListening()
 {
 	return listening_keyboard;
 }

@@ -14,6 +14,9 @@ void fill_a_rect_with_orange (VENG_Element* element)
 
 	SDL_Rect area = VENG_StartDrawing(element);
 
+	printf("SDL_Rect: %d %d %d %d\n", viewport.x, viewport.y, viewport.w, viewport.h);
+	printf("Area: %d %d %d %d\n", area.x, area.y, area.w, area.h);
+
 	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 255, 127, 80, 255);
 	SDL_RenderFillRect(VENG_GetDriver().renderer, &viewport);
 	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 0, 0, 0, 0);
@@ -21,6 +24,7 @@ void fill_a_rect_with_orange (VENG_Element* element)
 	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 255, 255, 255, 255);
 	SDL_RenderDrawLine(VENG_GetDriver().renderer, area.x, area.y, area.w, area.h);
 	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 0, 0, 0, 0);
+
 	VENG_StopDrawing(NULL);
 }
 

@@ -27,8 +27,7 @@ static bool any_dirty_element;
 inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
 	SDL_RenderSetViewport(driver.renderer, &element->rect);
-	SDL_Rect drawing_area = (SDL_Rect){0, 0, 0, 0};
-	SDL_GetRendererOutputSize(driver.renderer, &drawing_area.w, &drawing_area.h);
+	SDL_Rect drawing_area = (SDL_Rect){0, 0, element->rect.w, element->rect.h};
 	return drawing_area;
 }
 
