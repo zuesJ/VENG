@@ -1,10 +1,10 @@
 SHELL = cmd.exe
 
 CC = gcc
+AR = ar
 OUTPUT_NAME = VENG_dev.exe
-
+LIBRARY_NAME = libVENG.a
 BUILD_DIR = ./build/
-
 OUTPUT_PATH = $(OUTPUT_NAME)
 
 # SDL2 dependencies (Delete the -mwindows comment to execute it without the console)
@@ -20,7 +20,7 @@ LIBS = -lm
 # SDL2
 SDL2 = -I C:/SDL2/include -L C:/SDL2/lib -l SDL2main -l SDL2 -l SDL2_image
 
-all: create_build_dir $(OUTPUT_PATH)
+all: create_build_dir $(OUTPUT_PATH) $(LIBRARY_NAME)
 
 MODULES = $(BUILD_DIR)/main.o $(BUILD_DIR)/VENG.o $(BUILD_DIR)/VENG_listeners.o $(BUILD_DIR)/VENG_tools.o
 
@@ -32,6 +32,9 @@ $(OUTPUT_PATH): src/main.c src/main.h src/VENG.c src/VENG_listeners.c src/VENG_t
 
 	$(CC) -static $(MODULES) -o $(OUTPUT_PATH) $(WinMain) $(LIBS) $(SDL2) $(SDL2_DEPENDENCIES)
 
+$(LIBRARY_NAME): $(BUILD_DIR)/VENG.o $(BUILD_DIR)/VENG_listeners.o $(BUILD_DIR)/VENG_tools.o
+	$(AR) rcs $(LIBRARY_NAME) $(BUILD_DIR)/VENG.o $(BUILD_DIR)/VENG_listeners.o $(BUILD_DIR)/VENG_tools.o
+
 create_build_dir:
 	@if not exist "$(BUILD_DIR)" echo "Making build directory . . ."
 	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
@@ -40,5 +43,6 @@ clean:
 	@echo "Cleaning build. . ."
 	@if exist "$(BUILD_DIR)" rd /s /q "$(BUILD_DIR)"
 	@if exist "$(OUTPUT_NAME)" del "$(OUTPUT_NAME)"
+	@if exist "$(LIBRARY_NAME)" del "$(LIBRARY_NAME)"
 	
 

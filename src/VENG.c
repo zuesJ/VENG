@@ -58,6 +58,7 @@ void VENG_Destroy (bool closeSDL)
 	last_screen_size.x = 0;
 	last_screen_size.y = 0;
 	any_dirty_element = false;
+	VENG_ResetListeners();
 	if (closeSDL)
 	{
 		IMG_Quit();
@@ -107,6 +108,7 @@ void VENG_SetScreen(VENG_Screen* screen)
 		return;
 	}
 	rendering_screen = screen;
+	VENG_ResetListeners();
 	if (screen->icon != NULL)
 	{
 		SDL_SetWindowIcon(driver.window, screen->icon);

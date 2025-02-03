@@ -248,6 +248,8 @@ void VENG_KeyboardStopListening();
 
 bool VENG_KeyboardIsListening();
 
+void VENG_ResetListeners();
+
 
 /*==========================================================================*\
  *          VENG_tools.c - Useful functions for SDL & VENG development

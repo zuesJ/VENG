@@ -136,3 +136,14 @@ bool VENG_KeyboardIsListening()
 {
 	return listening_keyboard;
 }
+
+void VENG_ResetListeners()
+{
+	static VENG_MouseListener** mouse_listeners = NULL;
+	static size_t mouse_listeners_size = 0;
+	static size_t mouse_listeners_capacity = 0;
+
+	static char* keyboard_buffer = NULL;
+	static size_t keyboard_buffer_size = 0;
+	static bool listening_keyboard = false;
+}
