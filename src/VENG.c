@@ -13,7 +13,7 @@
 
 // SDL2 lib
 #include <SDL2/SDL.h>
-#include <SDL2_image/SDL_image.h>
+#include <SDL2/SDL_image.h>
 
 #include "VENG.h"
 
@@ -38,14 +38,16 @@ inline void VENG_StopDrawing(SDL_Rect* viewport)
 
 int VENG_Init (VENG_Driver new_driver)
 {
-	if (IMG_Init(IMG_INIT_PNG) == 0)
-	{
-		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
-		return -1;
-	}
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
+		return -1;
+	}
+	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+	int initted = IMG_Init(flags);
+	if ((initted & flags) != flags)
+	{
+		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
 		return -1;
 	}
 	driver = new_driver;
@@ -131,7 +133,7 @@ void VENG_PrepareElements()
 	int window_h;
 	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
 
-	for (int i = 0; i < rendering_screen->layout.sub_elements_size; i++)
+	for (size_t i = 0; i < rendering_screen->layout.sub_elements_size; i++)
 	{
 		if (rendering_screen->layout.sub_elements[i] != NULL)
 		{
@@ -185,7 +187,7 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 
 	// Compute coords
 	SDL_Point offset = (SDL_Point){0, 0};
-	for (int i = 0; i < layout->sub_elements_size; i++)
+	for (size_t i = 0; i < layout->sub_elements_size; i++)
 	{
 		if (layout->sub_elements[i] == element)
 		{
@@ -306,6 +308,16 @@ VENG_Screen* VENG_GetScreen()
 VENG_Driver VENG_GetDriver ()
 {
 	return driver;
+}
+
+SDL_Rect VENG_GetElementRect(VENG_Element* element)
+{
+	return element->rect;
+}
+
+SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element)
+{
+	return &element->rect;
 }
 
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)

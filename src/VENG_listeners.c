@@ -1,10 +1,12 @@
 #include <SDL2/SDL.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "VENG.h"
 
 #define LISTENERS_STARTING_HEAP 50
+#define ENABLE_KEYBOARD_ALPHA false
 
 // Pointer safety macro
 #define IS_NULL(ptr) ((ptr) != NULL ? (ptr) : (printf("Pointer %s is NULL in line %d, %s.\n", #ptr, __LINE__, __FILE__), exit(1), NULL))
@@ -22,7 +24,7 @@ bool static point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
 
 void VENG_Listen(SDL_Event event)
 {
-	if (event.type == SDL_TEXTINPUT)
+	if (event.type == SDL_TEXTINPUT && ENABLE_KEYBOARD_ALPHA)
 	{
 		strcat(keyboard_buffer, event.text.text);
 	}

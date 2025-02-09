@@ -196,6 +196,18 @@ SDL_Rect VENG_StartDrawing(VENG_Element* element);
 void VENG_StopDrawing(SDL_Rect* viewport);
 
 /*
+* Gets the rect of an element
+* Parameters: an Element*.
+*/
+SDL_Rect VENG_GetElementRect(VENG_Element* element);
+
+/*
+* Gets the rect ptr of an element
+* Parameters: an Element*.
+*/
+SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element);
+
+/*
 * Gets the current screen pointer
 * Parameters: none
 */
