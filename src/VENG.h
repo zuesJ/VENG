@@ -84,6 +84,7 @@ typedef struct VENG_Layout
 
 	VENG_Element** sub_elements;
 	size_t sub_elements_size;
+	size_t sub_elements_count;
 } VENG_Layout;
 
 typedef struct VENG_Screen
@@ -101,7 +102,7 @@ typedef struct VENG_Element
 	VENG_ParentType type;
 
 	SDL_Rect rect; // Px -> {x, y, w, h}
-	float w, h;  // Width and height in % -> [0, 1]
+	float w, h;    // Width and height in % -> [0, 1]
 	
 	bool stretch_size;
 	bool visible;
@@ -127,19 +128,31 @@ void VENG_Destroy(bool closeSDL);
 * Creates a layout
 * Parameters: All the Layout's fields
 */
-VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, VENG_Element** sub_elements, size_t sub_elements_size);
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical);
 
 /*
 * Creates a screen
 * Parameters: All the screen's fields
 */
-VENG_Screen VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout);
+VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout);
 
 /*
 * Creates an element
 * Parameters: All the element's fields
 */
-VENG_Element VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout);
+VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout);
+
+/*
+*
+*
+*/
+void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen);
+
+/*
+*
+*
+*/
+void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
 
 /*
 * Creates a driver

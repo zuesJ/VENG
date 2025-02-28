@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <math.h>
 
-// Debuging tools
-//#define NDEBUG // Delete the comment to prevent assert() from checking.
-#include <assert.h>
-
 // Pointer safety macro
 #define IS_NULL(ptr) ((ptr) != NULL ? (ptr) : (printf("Pointer %s is NULL in line %d, %s.\n", #ptr, __LINE__, __FILE__), exit(1), NULL))
 
@@ -17,8 +13,21 @@
 
 #include "VENG.h"
 
+static bool started = false;
+
 static VENG_Driver driver;
 static VENG_Screen* rendering_screen;
+
+#define ALLOCATED_SCREENS_START 10
+static VENG_Screen** screens = NULL;
+static size_t screens_current_slots = ALLOCATED_SCREENS_START;
+static size_t screens_used_slots = 0;
+
+#define ALLOCATED_ELEMENTS_START 100
+#define ALLOCATED_SUB_ELEMENTS_START 10
+static VENG_Element** elements = NULL;
+static size_t elements_current_slots = ALLOCATED_ELEMENTS_START;
+static size_t elements_used_slots = 0;
 
 // TO DO
 static SDL_Point last_screen_size;
@@ -50,7 +59,16 @@ int VENG_Init (VENG_Driver new_driver)
 		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
 		return -1;
 	}
+	if (new_driver.window == NULL || new_driver.renderer == NULL)
+	{
+		printf("Driver contains NULL contents\n");
+		return -1;
+	}
+
 	driver = new_driver;
+	screens = IS_NULL(calloc(ALLOCATED_SCREENS_START, sizeof(VENG_Screen*)));
+	elements = IS_NULL(calloc(ALLOCATED_ELEMENTS_START, sizeof(VENG_Element*)));
+	started = true;
 }
 
 void VENG_Destroy (bool closeSDL)
@@ -68,39 +86,153 @@ void VENG_Destroy (bool closeSDL)
 		SDL_DestroyWindow(driver.window);
 		SDL_Quit();
 	}
+	started = false;
 }
 
-VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, VENG_Element** sub_elements, size_t sub_elements_size)
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical)
 {
 	VENG_Layout layout;
 	layout.arrangement = arrangement;
 	layout.align_horizontal = align_horizontal;
 	layout.align_vertical = align_vertical;
-	layout.sub_elements = sub_elements;
-	layout.sub_elements_size = sub_elements_size;
+	layout.sub_elements = NULL;
+	layout.sub_elements_size = 0;
+
 	return layout;
 }
 
-VENG_Screen VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout)
+VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout)
 {
-	VENG_Screen screen;
-	screen.type = VENG_TYPE_SCREEN;
-	screen.title = title;
-	screen.icon = icon;
-	screen.layout = layout;
-	return screen;
+	if (!started)
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (screens_used_slots >= screens_current_slots)
+	{
+		screens_current_slots += ALLOCATED_SCREENS_START;
+		screens = IS_NULL(realloc(screens, screens_current_slots));
+		for (int i = screens_current_slots - ALLOCATED_SCREENS_START; i < screens_current_slots; i++)
+		{
+			screens[i] = NULL;
+		}
+	}
+	VENG_Screen* return_adress;
+	for (int i = 0; i < screens_current_slots; i++)
+	{
+		if (screens[i] == NULL)
+		{
+			screens[i] = IS_NULL(calloc(1, sizeof(VENG_Screen)));
+			screens[i]->type = VENG_TYPE_SCREEN;
+			screens[i]->title = title;
+			screens[i]->icon = icon;
+			screens[i]->layout = layout;
+			return_adress = screens[i];
+			break;
+		}
+	}
+	screens_used_slots++;
+	return return_adress;
 }
 
-VENG_Element VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
+VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout)
 {
-	VENG_Element element;
-	element.type = VENG_TYPE_ELEMENT;
-	element.w = w;
-	element.h = h;
-	element.stretch_size = stretch_size;
-	element.visible = visible;
-	element.layout = layout;
-	return element;
+	if (!started)
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
+	if (elements_used_slots >= elements_current_slots)
+	{
+		elements_current_slots += ALLOCATED_ELEMENTS_START;
+		elements = IS_NULL(realloc(elements, elements_current_slots));
+		for (int i = elements_current_slots - ALLOCATED_ELEMENTS_START; i < elements_current_slots; i++)
+		{
+			elements[i] = NULL;
+		}
+	}
+	VENG_Element* return_adress;
+	for (int i = 0; i < elements_current_slots; i++)
+	{
+		if (elements[i] == NULL)
+		{
+			elements[i] = IS_NULL(calloc(1, sizeof(VENG_Element)));
+			elements[i]->type = VENG_TYPE_ELEMENT;
+			elements[i]->w = w;
+			elements[i]->h = h;
+			elements[i]->stretch_size = stretch_size;
+			elements[i]->visible = visible;
+			elements[i]->layout = layout;
+			return_adress = elements[i];
+			break;
+		}
+	}
+	return return_adress;
+}
+
+void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen)
+{
+	if (!started)
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
+	if (screen->layout.sub_elements == NULL)
+	{
+		screen->layout.sub_elements = IS_NULL(calloc(ALLOCATED_SUB_ELEMENTS_START, sizeof(VENG_Element*)));
+		screen->layout.sub_elements_size = ALLOCATED_SUB_ELEMENTS_START;
+		screen->layout.sub_elements_count = 0;
+	}
+	if (screen->layout.sub_elements_count >= screen->layout.sub_elements_size)
+	{
+		screen->layout.sub_elements_size += ALLOCATED_SUB_ELEMENTS_START;
+		screen->layout.sub_elements = IS_NULL(realloc(screen->layout.sub_elements, screen->layout.sub_elements_size));
+		for (int i = screen->layout.sub_elements_size - ALLOCATED_SUB_ELEMENTS_START; i < screen->layout.sub_elements_size; i++)
+		{
+			screen->layout.sub_elements[i] = NULL;
+		}
+	}
+	for (int i = 0; i < screen->layout.sub_elements_size; i++)
+	{
+		if (screen->layout.sub_elements[i] == NULL)
+		{
+			screen->layout.sub_elements[i] = element;
+			break;
+		}
+	}
+}
+
+void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element)
+{
+	if (!started)
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
+	if (element->layout.sub_elements == NULL)
+	{
+		element->layout.sub_elements = IS_NULL(calloc(ALLOCATED_SUB_ELEMENTS_START, sizeof(VENG_Element*)));
+		element->layout.sub_elements_size = ALLOCATED_SUB_ELEMENTS_START;
+		element->layout.sub_elements_count = 0;
+	}
+	if (element->layout.sub_elements_count >= element->layout.sub_elements_size)
+	{
+		element->layout.sub_elements_size += ALLOCATED_SUB_ELEMENTS_START;
+		element->layout.sub_elements = IS_NULL(realloc(element->layout.sub_elements, element->layout.sub_elements_size));
+		for (int i = element->layout.sub_elements_size - ALLOCATED_SUB_ELEMENTS_START; i < element->layout.sub_elements_size; i++)
+		{
+			element->layout.sub_elements[i] = NULL;
+		}
+	}
+	for (int i = 0; i < element->layout.sub_elements_size; i++)
+	{
+		if (element->layout.sub_elements[i] == NULL)
+		{
+			element->layout.sub_elements[i] = sub_element;
+			break;
+		}
+	}
 }
 
 void VENG_SetScreen(VENG_Screen* screen)
@@ -146,7 +278,7 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 {
 	if (!element->visible)
 	{
-		// Sets the rect with -1 to avoid SDL to render the element
+		// Sets the rect with -1s to avoid SDL from rendering the element
 		element->rect = (SDL_Rect){-1, -1, -1, -1};
 		return;
 	}
@@ -286,7 +418,6 @@ void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect
 	}
 
 	// Check for sub-elements
-
 	if (element->layout.sub_elements != NULL)
 	{
 		for (int i = 0; i < element->layout.sub_elements_size; i++)

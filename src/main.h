@@ -8,21 +8,12 @@ void box2_on_click(VENG_Element* element, SDL_Event* event)
 	palanquisima = (palanquisima) ? false : true;
 }
 
-void fill_a_rect_with_orange (VENG_Element* element)
+void fill_a_rect_with_color (VENG_Element* element, SDL_Color color)
 {
-	SDL_Rect viewport = element->rect;
-
 	SDL_Rect area = VENG_StartDrawing(element);
 
-	printf("SDL_Rect: %d %d %d %d\n", viewport.x, viewport.y, viewport.w, viewport.h);
-	printf("Area: %d %d %d %d\n", area.x, area.y, area.w, area.h);
-
-	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 255, 127, 80, 255);
-	SDL_RenderFillRect(VENG_GetDriver().renderer, &viewport);
-	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 0, 0, 0, 0);
-
-	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 255, 255, 255, 255);
-	SDL_RenderDrawLine(VENG_GetDriver().renderer, area.x, area.y, area.w, area.h);
+	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderFillRect(VENG_GetDriver().renderer, &area);
 	SDL_SetRenderDrawColor(VENG_GetDriver().renderer, 0, 0, 0, 0);
 
 	VENG_StopDrawing(NULL);

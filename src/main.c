@@ -16,7 +16,7 @@
 //#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
-#include <SDL2_image/SDL_image.h>
+#include <SDL2/SDL_image.h>
 
 // VENG
 #include "VENG.h"
@@ -28,6 +28,8 @@
 #define TITLE "Physics Simulator"
 #define FPS 1000
 
+static void start_SDL();
+
 SDL_Window* window;
 
 SDL_Renderer* renderer;
@@ -36,6 +38,76 @@ VENG_Driver driver;
 
 // main loop
 int main (int argc, char* argv[])
+{
+	start_SDL();
+
+	VENG_Init(driver);
+	
+	VENG_Screen* main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP));
+	VENG_Element* element = VENG_CreateElement(0.5f, 0.5f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER));
+	VENG_Element* sub_element = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP));
+	VENG_Element* sub_element2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP));
+	VENG_AddElementToScreen(element, main_screen);
+	VENG_AddSubElementToElement(sub_element, element);
+	VENG_AddSubElementToElement(sub_element2, element);
+	VENG_SetScreen(main_screen);
+
+	SDL_Event event;
+	int close_requested = 0;
+
+	Uint64 time0 = SDL_GetTicks64();
+	int w;
+	int h;
+	while(!close_requested)
+	{
+
+		Uint64 start = SDL_GetPerformanceCounter();
+
+		while (SDL_PollEvent(&event)) // Retrieve events
+		{	
+			VENG_Listen(event);
+			switch (event.type)
+			{
+				case SDL_QUIT:
+					close_requested = 1;
+					break;
+			}
+		}
+
+		SDL_RenderClear(renderer);
+
+		VENG_PrepareElements();
+
+		fill_a_rect_with_color(element, (SDL_Color){255, 165, 100, 255});
+		fill_a_rect_with_color(sub_element, (SDL_Color){255, 255, 255, 255});
+		fill_a_rect_with_color(sub_element2, (SDL_Color){255, 13, 243, 255});
+
+		SDL_GetRendererOutputSize(renderer, &w, &h);
+
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+		SDL_RenderPresent(renderer);
+		
+		Uint64 end = SDL_GetPerformanceCounter();
+
+		double elapsed = (double)(end - start) / SDL_GetPerformanceFrequency();
+
+    	//printf("Time taken: %f seconds\n", elapsed);
+
+		// FPS management
+		int time = (1000 / FPS) - (SDL_GetTicks64() - time0);
+		if (time < 0)
+		{
+			time = 0;
+		}
+		SDL_Delay(time);
+
+		time0 = SDL_GetTicks64();
+	}
+	VENG_Destroy(true);
+}
+
+static void start_SDL()
 {
 	if (IMG_Init(IMG_INIT_PNG) == 0)
 	{
@@ -69,103 +141,4 @@ int main (int argc, char* argv[])
 	}
 
 	driver = (VENG_Driver){window, renderer};
-
-	// Screen design
-	VENG_Screen main_screen;
-		VENG_Element** main_screen_elements = IS_NULL(calloc(2, sizeof(VENG_Element*)));
-		
-		VENG_Element canvas;
-			main_screen_elements[0] = &canvas;
-
-		VENG_Element tool_box;
-			main_screen_elements[1] = &tool_box;
-
-			VENG_Element** main_screen_tb_e = IS_NULL(calloc(2, sizeof(VENG_Element*)));
-
-			VENG_Element box1;
-				main_screen_tb_e[0] = &box1;
-
-			VENG_Element box2;
-				main_screen_tb_e[1] = &box2;
-
-
-	main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_VERTICAL, VENG_LEFT, VENG_TOP, main_screen_elements, 2));
-
-	canvas = VENG_CreateElement(0.4f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
-
-	tool_box = VENG_CreateElement(0.3f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_RIGHT, VENG_BOTTOM, main_screen_tb_e, 2));
-
-	box1 = VENG_CreateElement(0.2f, 0.3f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
-
-	box2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, NULL, 0));
-
-	VENG_AddMouseListener(&box2, box2_on_click, VENG_createMouseTrigger(false, false, true, false));
-	VENG_AddMouseListener(&tool_box, tool_box_on_click, VENG_createMouseTrigger(false, true, false, false));
-
-	VENG_Init(driver);
-	VENG_SetScreen(&main_screen);
-
-	SDL_Event event;
-	int close_requested = 0;
-
-	Uint64 time0 = SDL_GetTicks64();
-	int w;
-	int h;
-	while(!close_requested)
-	{
-
-		Uint64 start = SDL_GetPerformanceCounter();
-
-		while (SDL_PollEvent(&event)) // Retrieve events
-		{	
-			VENG_Listen(event);
-			switch (event.type)
-			{
-				case SDL_QUIT:
-					close_requested = 1;
-					break;
-			}
-		}
-
-		SDL_RenderClear(renderer);
-
-		VENG_PrepareElements();
-
-		SDL_GetRendererOutputSize(renderer, &w, &h);
-
-		if (palanquisima)
-		{
-			fill_a_rect_with_orange(&canvas);
-		}
-		
-		SDL_SetRenderDrawColor(renderer, 100, 255, 255, 255);
-		SDL_RenderFillRect(renderer, &tool_box.rect);
-	
-		SDL_SetRenderDrawColor(renderer, 232, 18, 104, 255);
-		SDL_RenderFillRect(renderer, &box1.rect);
-	
-		SDL_SetRenderDrawColor(renderer, 255, 128, 54, 255);
-		SDL_RenderFillRect(renderer, &box2.rect);
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-		SDL_RenderPresent(renderer);
-		
-		Uint64 end = SDL_GetPerformanceCounter();
-
-		double elapsed = (double)(end - start) / SDL_GetPerformanceFrequency();
-
-    		printf("Time taken: %f seconds\n", elapsed);
-
-		// FPS management
-		int time = (1000 / FPS) - (SDL_GetTicks64() - time0);
-		if (time < 0)
-		{
-			time = 0;
-		}
-		SDL_Delay(time);
-
-		time0 = SDL_GetTicks64();
-	}
-	VENG_Destroy(true);
 }
