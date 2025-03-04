@@ -95,6 +95,8 @@ typedef struct VENG_Screen
 	SDL_Surface* icon;
 	
 	VENG_Layout layout;
+
+	bool dirty;
 } VENG_Screen;
 
 typedef struct VENG_Element
@@ -128,7 +130,7 @@ void VENG_Destroy(bool closeSDL);
 * Creates a layout
 * Parameters: All the Layout's fields
 */
-VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical);
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, size_t max_childs);
 
 /*
 * Creates a screen
@@ -154,6 +156,8 @@ void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen);
 */
 void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
 
+void VENG_PrintScreenHierarchy(VENG_Screen* screen);
+
 /*
 * Creates a driver
 * Paramters: A SDL window and renderer pointer
@@ -174,26 +178,17 @@ void VENG_SetDriver(VENG_Driver driver);
 void VENG_SetScreen(VENG_Screen* screen);
 
 /*
-* Marks all elements as dirty.
-* If an element is not marked as dirty, the VENG_PrepareElements() will ignore it (for perfomance purposes).
-* VENG will automaticly set an element as dirty if the user changed any field that directly affects how the element is being drawn*.
-	*only works if the user uses a VENG_SetSomeValue function.
-* If the screen is resized, this function will be called automaticly.
-*/
-void VENG_RefreshAllElements();
-
-/*
 * Goes through all the Elements in the current screen and fills the SDL_Rect field of each Element according
 * to the window size and custom sizes and positioning.
 * Parameters: none
 */
-void VENG_PrepareElements();
+void VENG_PrepareScreen(VENG_Screen* screen);
 
 /*
 * Fills the SDL_Rect field of the Element provided and also does the same for its sub-components. Created to be recursive.
 * Parameters: a pointer to the Element, a void pointer to a parent Element* or Screen* and a SDL_Rect where the Element will be drawn,
 */
-void VENG_PrepareElement(VENG_Element* element, void* parent_container, SDL_Rect drawing_rect);
+void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect);
 
 /*
 * Start drawing on an element, this sets the viewport to the element area
