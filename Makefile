@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = #-Wall -Wextra -fPIC
+CFLAGS = -Wall -Wextra #-fPIC
 
 # Source and object files
 SRC = src/VENG.c src/VENG_listeners.c src/VENG_tools.c

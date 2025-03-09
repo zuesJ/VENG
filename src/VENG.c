@@ -38,16 +38,16 @@ void VENG_PrintScreenHierarchy(VENG_Screen* screen)
 	printf("Screen: %s\n", screen->title);
 	printf("\tAttributes: isDirty: %d, Arrangement: %d, align_h: %d, align_v: %d\n",
 			screen->dirty, screen->layout.arrangement, screen->layout.align_horizontal, screen->layout.align_vertical);
-	printf("\tSub_elements: %p, size: %d, count: %d\n" , screen->layout.sub_elements, screen->layout.sub_elements_size, screen->layout.sub_elements_count);
-	for (int i = 0; i < screen->layout.sub_elements_size; i++)
+	printf("\tSub_elements: %p, size: %ld, count: %ld\n" , screen->layout.sub_elements, screen->layout.sub_elements_size, screen->layout.sub_elements_count);
+	for (size_t i = 0; i < screen->layout.sub_elements_size; i++)
 	{
 		if (screen->layout.sub_elements[i] == NULL)
 		{
-			printf("\t\tSlot %d: empty\n", i);
+			printf("\t\tSlot %ld: empty\n", i);
 		}
 		else
 		{
-			printf("\t\tSlot %d: ", i);
+			printf("\t\tSlot %ld: ", i);
 			__PrintElementHierarchy(screen->layout.sub_elements[i], 2);
 		}
 	}
@@ -55,46 +55,46 @@ void VENG_PrintScreenHierarchy(VENG_Screen* screen)
 static void __PrintElementHierarchy(VENG_Element* element, size_t tabs)
 {
 	printf("%p\n", element);
-	for (int tab = 0; tab < tabs; tab++)
+	for (size_t tab = 0; tab < tabs; tab++)
 	{
 		printf("\t");
 	}
 	printf("\tAttributes: Rect={%d, %d, %d, %d}, W,H: %.3f %.3f, stretch_size: %d, visible: %d, dirty: %d, Arrangement: %d, align_h: %d, align_v: %d\n", element->rect.x, element->rect.y, element->rect.w, element->rect.h,
 			element->w, element->h, element->stretch_size, element->visible, element->dirty, element->layout.arrangement, element->layout.align_horizontal, element->layout.align_vertical);
-	for (int tab = 0; tab < tabs; tab++)
+	for (size_t tab = 0; tab < tabs; tab++)
 	{
 		printf("\t");
 	}
-	printf("\tSub_elements: %p, size: %d, count: %d\n" , element->layout.sub_elements, element->layout.sub_elements_size, element->layout.sub_elements_count);
-	for (int i = 0; i < element->layout.sub_elements_size; i++)
+	printf("\tSub_elements: %p, size: %ld, count: %ld\n" , element->layout.sub_elements, element->layout.sub_elements_size, element->layout.sub_elements_count);
+	for (size_t i = 0; i < element->layout.sub_elements_size; i++)
 	{
 		if (element->layout.sub_elements == NULL)
 		{
-			for (int j = 0; i < element->layout.sub_elements_size; i++)
+			for (; i < element->layout.sub_elements_size; i++)
 			{
-				for (int tab = 0; tab < tabs; tab++)
+				for (size_t tab = 0; tab < tabs; tab++)
 				{
 					printf("\t");
 				}
-				printf("\t\tSlot %d: empty\n", i);
+				printf("\t\tSlot %ld: empty\n", i);
 				}
 			break;
 		}
 		if (element->layout.sub_elements[i] == NULL)
 		{
-			for (int tab = 0; tab < tabs; tab++)
+			for (size_t tab = 0; tab < tabs; tab++)
 			{
 				printf("\t");
 			}
-			printf("\t\tSlot %d: empty\n", i);
+			printf("\t\tSlot %ld: empty\n", i);
 		}
 		else
 		{
-			for (int tab = 0; tab < tabs; tab++)
+			for (size_t tab = 0; tab < tabs; tab++)
 			{
 				printf("\t");
 			}
-			printf("\t\tSlot %d: ", i);
+			printf("\t\tSlot %ld: ", i);
 			__PrintElementHierarchy(element->layout.sub_elements[i], tabs+2);
 		}
 	}
@@ -137,6 +137,7 @@ int VENG_Init (VENG_Driver new_driver)
 	screens = IS_NULL(calloc(ALLOCATED_SCREENS_START, sizeof(VENG_Screen*)));
 	elements = IS_NULL(calloc(ALLOCATED_ELEMENTS_START, sizeof(VENG_Element*)));
 	started = true;
+	return 0;
 }
 
 void VENG_Destroy (bool closeSDL)
@@ -181,13 +182,13 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layou
 	{
 		screens_current_slots += ALLOCATED_SCREENS_START;
 		screens = IS_NULL(realloc(screens, screens_current_slots));
-		for (int i = screens_current_slots - ALLOCATED_SCREENS_START; i < screens_current_slots; i++)
+		for (size_t i = screens_current_slots - ALLOCATED_SCREENS_START; i < screens_current_slots; i++)
 		{
 			screens[i] = NULL;
 		}
 	}
 	VENG_Screen* return_adress;
-	for (int i = 0; i < screens_current_slots; i++)
+	for (size_t i = 0; i < screens_current_slots; i++)
 	{
 		if (screens[i] == NULL)
 		{
@@ -216,13 +217,13 @@ VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visib
 	{
 		elements_current_slots += ALLOCATED_ELEMENTS_START;
 		elements = IS_NULL(realloc(elements, elements_current_slots));
-		for (int i = elements_current_slots - ALLOCATED_ELEMENTS_START; i < elements_current_slots; i++)
+		for (size_t i = elements_current_slots - ALLOCATED_ELEMENTS_START; i < elements_current_slots; i++)
 		{
 			elements[i] = NULL;
 		}
 	}
 	VENG_Element* return_adress;
-	for (int i = 0; i < elements_current_slots; i++)
+	for (size_t i = 0; i < elements_current_slots; i++)
 	{
 		if (elements[i] == NULL)
 		{
@@ -258,7 +259,7 @@ void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen)
 		printf("Couldn't add Element: max size reached\n");
 		return;
 	}
-	for (int i = 0; i < screen->layout.sub_elements_size; i++)
+	for (size_t i = 0; i < screen->layout.sub_elements_size; i++)
 	{
 		if (screen->layout.sub_elements[i] == NULL)
 		{
@@ -287,7 +288,7 @@ void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* elemen
 		printf("Couldn't add Element: max size reached\n");
 		return;
 	}
-	for (int i = 0; i < element->layout.sub_elements_size; i++)
+	for (size_t i = 0; i < element->layout.sub_elements_size; i++)
 	{
 		if (element->layout.sub_elements[i] == NULL)
 		{
@@ -374,7 +375,7 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 
 	// (I)
 	float screen_ratio = (float)drawing_rect.w / drawing_rect.h;
-	for (int i = 0; i < layout->sub_elements_size; i++)
+	for (size_t i = 0; i < layout->sub_elements_size; i++)
 	{
 		if (layout->sub_elements[i] != NULL)
 		{
@@ -406,9 +407,32 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 
 	// (II)
 	SDL_Point offset = (SDL_Point){0, 0};
+	SDL_Point current_center = (SDL_Point){0, 0};
+	if (layout->align_horizontal == VENG_CENTER)
+	{
+		for (size_t i = 0; i < layout->sub_elements_size; i++)
+		{
+			if (layout->sub_elements[i] != NULL)
+			{
+				current_center.x += layout->sub_elements[i]->rect.w;
+			}
+		}
+		current_center.x = round((drawing_rect.w - current_center.x) / 2);
+	}
+	if (layout->align_vertical == VENG_CENTER)
+	{
+		for (size_t i = 0; i < layout->sub_elements_size; i++)
+		{
+			if (layout->sub_elements[i] != NULL)
+			{
+				current_center.y += layout->sub_elements[i]->rect.h;
+			}
+		}
+		current_center.y = round((drawing_rect.h - current_center.y) / 2);
+	}
 	if (layout->arrangement == VENG_HORIZONTAL)
 	{
-		for (int i = 0; i < layout->sub_elements_size; i++)
+		for (size_t i = 0; i < layout->sub_elements_size; i++)
 		{
 			if (layout->sub_elements[i] != NULL)
 			{
@@ -418,7 +442,8 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 						layout->sub_elements[i]->rect.x = drawing_rect.x + offset.x;
 						break;
 					case VENG_CENTER:
-						layout->sub_elements[i]->rect.x = drawing_rect.x + round((drawing_rect.w - layout->sub_elements[i]->rect.w)/2); // some offset
+						layout->sub_elements[i]->rect.x = current_center.x;
+						current_center.x += layout->sub_elements[i]->rect.w;
 						break;
 					case VENG_RIGHT:
 						layout->sub_elements[i]->rect.x = drawing_rect.x + drawing_rect.w - layout->sub_elements[i]->rect.w - offset.x;
@@ -433,7 +458,7 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 						layout->sub_elements[i]->rect.y = drawing_rect.y;
 						break;
 					case VENG_CENTER:
-						layout->sub_elements[i]->rect.y = drawing_rect.y + round((drawing_rect.h - layout->sub_elements[i]->rect.h)/2);
+						layout->sub_elements[i]->rect.y = drawing_rect.y + round((drawing_rect.h - layout->sub_elements[i]->rect.h)/2); 
 						break;
 					case VENG_BOTTOM:
 						layout->sub_elements[i]->rect.y = drawing_rect.y + drawing_rect.h - layout->sub_elements[i]->rect.h;
@@ -450,7 +475,7 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 	}
 	else if (layout->arrangement == VENG_VERTICAL)
 	{
-		for (int i = 0; i < layout->sub_elements_size; i++)
+		for (size_t i = 0; i < layout->sub_elements_size; i++)
 		{
 			if (layout->sub_elements[i] != NULL)
 			{
@@ -475,7 +500,8 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 						layout->sub_elements[i]->rect.y = drawing_rect.y + offset.y;
 						break;
 					case VENG_CENTER:
-						layout->sub_elements[i]->rect.y = drawing_rect.y + round((drawing_rect.h - layout->sub_elements[i]->rect.h)/2); // + some h offset
+						layout->sub_elements[i]->rect.y = current_center.y;
+						current_center.y += layout->sub_elements[i]->rect.h;
 						break;
 					case VENG_BOTTOM:
 						layout->sub_elements[i]->rect.y = drawing_rect.y + drawing_rect.h - layout->sub_elements[i]->rect.h - offset.y;
@@ -484,6 +510,9 @@ void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect)
 						printf("Invalid align_v argument.\n");
 						return;
 				}
+				offset.y += layout->sub_elements[i]->rect.h;
+				// (III)
+				VENG_PrepareChilds(layout->sub_elements[i], layout->sub_elements[i]->rect);
 			}
 		}
 	}

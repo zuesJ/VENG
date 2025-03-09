@@ -19,8 +19,8 @@ static char* keyboard_buffer;
 static size_t keyboard_buffer_size;
 static bool listening_keyboard;
 
-void static check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event);
-bool static point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
+static void check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event);
+static bool point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
 
 void VENG_Listen(SDL_Event event)
 {
@@ -28,7 +28,7 @@ void VENG_Listen(SDL_Event event)
 	{
 		strcat(keyboard_buffer, event.text.text);
 	}
-	for (int i = 0; i < mouse_listeners_size; i++)
+	for (size_t i = 0; i < mouse_listeners_size; i++)
 	{
 		if (mouse_listeners[i] != NULL)
 		{	
@@ -37,7 +37,7 @@ void VENG_Listen(SDL_Event event)
 	}
 }
 
-void static check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event)
+static void check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event)
 {
 	if (event->type == SDL_MOUSEMOTION && m_listener->m_trigger.m_motion)
 	{
@@ -57,7 +57,7 @@ void static check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* even
 	}
 }
 
-bool static point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect)
+static bool point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect)
 {
 	if (x < rect.x || x >= rect.x + rect.w)
 	{
@@ -82,13 +82,13 @@ void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call,
 	{
 		mouse_listeners_size += LISTENERS_STARTING_HEAP;
 		mouse_listeners = IS_NULL(realloc(mouse_listeners, mouse_listeners_size));
-		for (int i = mouse_listeners_size - LISTENERS_STARTING_HEAP; i < mouse_listeners_size; i++)
+		for (size_t i = mouse_listeners_size - LISTENERS_STARTING_HEAP; i < mouse_listeners_size; i++)
 		{
 			mouse_listeners[i] = NULL;
 		}
 	}	
 
-	for (int i = 0; i < mouse_listeners_size; i++)
+	for (size_t i = 0; i < mouse_listeners_size; i++)
 	{
 		if (mouse_listeners[i] == NULL)
 		{
@@ -141,11 +141,11 @@ bool VENG_KeyboardIsListening()
 
 void VENG_ResetListeners()
 {
-	static VENG_MouseListener** mouse_listeners = NULL;
-	static size_t mouse_listeners_size = 0;
-	static size_t mouse_listeners_capacity = 0;
+	mouse_listeners = NULL;
+	mouse_listeners_size = 0;
+	mouse_listeners_capacity = 0;
 
-	static char* keyboard_buffer = NULL;
-	static size_t keyboard_buffer_size = 0;
-	static bool listening_keyboard = false;
+	keyboard_buffer = NULL;
+	keyboard_buffer_size = 0;
+	listening_keyboard = false;
 }
