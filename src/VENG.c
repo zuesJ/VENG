@@ -234,6 +234,8 @@ VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visib
 			elements[i]->stretch_size = stretch_size;
 			elements[i]->visible = visible;
 			elements[i]->layout = layout;
+			elements[i]->layout.sub_elements = NULL;
+			elements[i]->layout.sub_elements_count = 0;
 			elements[i]->dirty = true;
 			return_adress = elements[i];
 			break;
