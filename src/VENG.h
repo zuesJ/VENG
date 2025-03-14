@@ -40,13 +40,14 @@
 
 typedef enum VENG_ParentType VENG_ParentType;
 
-typedef struct VENG_Element VENG_Element;
-typedef struct VENG_Layout VENG_Layout;
-
 typedef enum VENG_Arrangement VENG_Arrangement;
 typedef enum VENG_Align VENG_Align;
 
 typedef struct VENG_Screen VENG_Screen;
+typedef struct VENG_Layer VENG_Layer;
+typedef struct VENG_Element VENG_Element;
+typedef struct VENG_Layout VENG_Layout;
+
 typedef struct VENG_Driver VENG_Driver;
 
 typedef enum VENG_ParentType
@@ -95,8 +96,6 @@ typedef struct VENG_Screen
 	SDL_Surface* icon;
 	
 	VENG_Layout layout;
-
-	bool dirty;
 } VENG_Screen;
 
 typedef struct VENG_Element
