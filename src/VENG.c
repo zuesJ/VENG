@@ -100,7 +100,6 @@ static void __PrintElementHierarchy(VENG_Element* element, size_t tabs)
 	}
 }
 
-
 inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
 	SDL_RenderSetViewport(driver.renderer, &element->rect);

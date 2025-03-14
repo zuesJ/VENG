@@ -114,119 +114,51 @@ typedef struct VENG_Element
 	VENG_Layout layout;
 } VENG_Element;
 
-/*
-* Starts the SDL subsystems
-* Parameters: A driver struct
-*/
+// Start and finish
 int VENG_Init(VENG_Driver driver);
 
-/*
-* Shuts down the SDL subsystems
-* Parameters: closeSDL: if this flag is true, it will also shutdown SDL and SDL_Image
-*/
 void VENG_Destroy(bool closeSDL);
 
-/*
-* Creates a layout
-* Parameters: All the Layout's fields
-*/
-VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, size_t max_childs);
-
-/*
-* Creates a screen
-* Parameters: All the screen's fields
-*/
-VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout);
-
-/*
-* Creates an element
-* Parameters: All the element's fields
-*/
-VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout);
-
-/*
-*
-*
-*/
-void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen);
-
-/*
-*
-*
-*/
-void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
-
-void VENG_PrintScreenHierarchy(VENG_Screen* screen);
-
-/*
-* Creates a driver
-* Paramters: A SDL window and renderer pointer
-* Returns a VENG_Driver
-*/
+// Create
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer);
 
-/*
-* Sets a driver as the main rendering scene
-* Paramters: A VENG_Driver
-*/
-void VENG_SetDriver(VENG_Driver driver);
+VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout);
 
-/*
-* Sets a screen as the current rendering screen
-* Parameters: a screen pointer
-*/
-void VENG_SetScreen(VENG_Screen* screen);
+VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout);
 
-/*
-* Goes through all the Elements in the current screen and fills the SDL_Rect field of each Element according
-* to the window size and custom sizes and positioning.
-* Parameters: none
-*/
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, size_t max_childs);
+
+// Debug
+void VENG_PrintScreenHierarchy(VENG_Screen* screen);
+
+// Add 
+void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen);
+
+void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
+
+// Prepare
 void VENG_PrepareScreen(VENG_Screen* screen);
 
-/*
-* Fills the SDL_Rect field of the Element provided and also does the same for its sub-components. Created to be recursive.
-* Parameters: a pointer to the Element, a void pointer to a parent Element* or Screen* and a SDL_Rect where the Element will be drawn,
-*/
 void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect);
 
-/*
-* Start drawing on an element, this sets the viewport to the element area
-* Parameters: an element pointer
-* Returns the drawing area
-*/
+// Set
+void VENG_SetDriver(VENG_Driver driver);
+
+void VENG_SetScreen(VENG_Screen* screen);
+
+// Drawing
 SDL_Rect VENG_StartDrawing(VENG_Element* element);
 
-/*
-* Stops drawing on an element, this sets the viewport to the default value or to a desired SDL_Rect
-* Parameters: an SDL_Rect pointer, if the pointer is null, it will set the viewport as the default screen dimentions
-*/
 void VENG_StopDrawing(SDL_Rect* viewport);
 
-/*
-* Gets the rect of an element
-* Parameters: an Element*.
-*/
+// Get
 SDL_Rect VENG_GetElementRect(VENG_Element* element);
 
-/*
-* Gets the rect ptr of an element
-* Parameters: an Element*.
-*/
 SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element);
 
-/*
-* Gets the current screen pointer
-* Parameters: none
-*/
 VENG_Screen* VENG_GetScreen();
 
-/*
-* Gets the current driver
-* Parameters: none
-*/
 VENG_Driver VENG_GetDriver();
-
 
 /*==========================================================================*\
  *                    VENG_listeners.c - Input management 
@@ -269,19 +201,5 @@ void VENG_KeyboardStopListening();
 bool VENG_KeyboardIsListening();
 
 void VENG_ResetListeners();
-
-
-/*==========================================================================*\
- *          VENG_tools.c - Useful functions for SDL & VENG development
-\*==========================================================================*/
-
-/*
-* Loads a PNG into a SDL_Surface
-* Parameters: the PNG's path
-* Notes: acts as a wrapper for Load_IMG (in SDL_Image)
-* 	 If the path doesn't lead to any image, it will print an alert msg
-*/
-SDL_Surface* VENG_LoadPNG (const char* path);
-
 
 #endif

@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "VENG.h"
 
@@ -15,9 +16,10 @@
 
 // Settings
 #define TITLE "Physics Simulator"
-#define FPS 5
+#define FPS 144
 
 static void start_SDL();
+static SDL_Surface* LoadPNG (const char* path);
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -29,8 +31,8 @@ int main (int argc, char* argv[])
 
 	VENG_Init(driver);
 	
-	VENG_Screen* main_screen = VENG_CreateScreen(TITLE, VENG_LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM, 3));
-	VENG_Element* element = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 1));
+	VENG_Screen* main_screen = VENG_CreateScreen(TITLE, LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM, 3));
+	VENG_Element* element = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
 	VENG_Element* element2 = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER, 0));
 	VENG_Element* sub_element = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 1));
 	VENG_Element* sub_element2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
@@ -43,6 +45,9 @@ int main (int argc, char* argv[])
 	//VENG_AddSubElementToElement(sub_element2, sub_element);
 	VENG_SetScreen(main_screen);
 
+	TTF_Font* comf = TTF_OpenFont("res/Comfortaa-Regular.ttf", 100);
+	Label lab = (Label){"Hi world", 200, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}};
+
 	VENG_PrintScreenHierarchy(main_screen);
 
 	SDL_Event event;
@@ -53,8 +58,6 @@ int main (int argc, char* argv[])
 	int h;
 	while(!close_requested)
 	{
-		//Uint64 start = SDL_GetPerformanceCounter();
-
 		while (SDL_PollEvent(&event))
 		{	
 			VENG_Listen(event);
@@ -71,11 +74,12 @@ int main (int argc, char* argv[])
 		VENG_PrepareScreen(main_screen);
 		//VENG_PrintScreenHierarchy(main_screen);
 
-		fill_a_rect_with_color(element, (SDL_Color){255, 165, 100, 255});
+		draw_label (&lab, element, comf);
+		//fill_a_rect_with_color(element, (SDL_Color){255, 165, 100, 255});
 		fill_a_rect_with_color(element2, (SDL_Color){255, 12, 100, 255});
-		fill_a_rect_with_color(sub_element, (SDL_Color){255, 255, 255, 255});
-		fill_a_rect_with_color(sub_element2, (SDL_Color){255, 13, 67, 255});
-		fill_a_rect_with_color(test, (SDL_Color){232, 13, 67, 255});
+		//fill_a_rect_with_color(sub_element, (SDL_Color){255, 255, 255, 255});
+		//fill_a_rect_with_color(sub_element2, (SDL_Color){255, 13, 67, 255});
+		//fill_a_rect_with_color(test, (SDL_Color){232, 13, 67, 255});
 
 
 		SDL_GetRendererOutputSize(renderer, &w, &h);
@@ -105,6 +109,12 @@ int main (int argc, char* argv[])
 
 static void start_SDL()
 {
+	if (TTF_Init() != 0)
+	{
+		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
+		exit(-1);
+	}
+
 	if (IMG_Init(IMG_INIT_PNG) == 0)
 	{
 		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
@@ -136,5 +146,16 @@ static void start_SDL()
 		exit(-1);
 	}
 
-	driver = (VENG_Driver){window, renderer};
+	driver = VENG_CreateDriver(window, renderer);
+}
+
+static SDL_Surface* LoadPNG (const char* path)
+{
+	SDL_Surface* surface = IMG_Load(path);
+	if (surface == NULL)
+	{
+		printf("Failed to load the PNG image: %s\n", IMG_GetError());
+		return NULL;
+	}
+	return surface;
 }
