@@ -38,20 +38,44 @@
  *                   VENG.c - Core Functions, structs & enums
 \*==========================================================================*/
 
-typedef enum VENG_ParentType VENG_ParentType;
+// Program Hierarchy Example:
+// Screen
+// ├- Title, icon
+// └- Layers (+ size and count)
+//	  ├- Layer 1 (could be the main program)
+//	  |  ├- Layout (arrangement, align_h and align_v)
+//    |  └- Childs
+//    |     ├- Element 1
+//    |     ├- Element 2
+//    |     └- Element ...
+//    |         
+//    └- Layer 2 (could be a tactil keyboard)
+//       ├- Layout (arrangement, align_h and align_v)
+//       └- Childs
+//          ├- Element 1
+//          ├- Element 2
+//          └- Element ...
+//
 
-typedef struct VENG_Element VENG_Element;
-typedef struct VENG_Layout VENG_Layout;
+
+typedef enum VENG_ParentType VENG_ParentType;
 
 typedef enum VENG_Arrangement VENG_Arrangement;
 typedef enum VENG_Align VENG_Align;
 
 typedef struct VENG_Screen VENG_Screen;
+typedef struct VENG_Layer VENG_Layer;
+typedef struct VENG_Element VENG_Element;
+typedef struct VENG_Layout VENG_Layout;
+typedef struct VENG_Childs VENG_Childs;
+
 typedef struct VENG_Driver VENG_Driver;
 
 typedef enum VENG_ParentType
 {
+	VENG_NOT_CREATED = 0,
 	VENG_TYPE_SCREEN,
+	VENG_TYPE_LAYER,
 	VENG_TYPE_ELEMENT
 } VENG_ParentType;
 
@@ -81,11 +105,14 @@ typedef struct VENG_Layout
 	VENG_Arrangement arrangement;
 	VENG_Align align_horizontal;
 	VENG_Align align_vertical;
+} VENG_Layout;
 
+typedef struct VENG_Childs
+{
 	VENG_Element** sub_elements;
 	size_t sub_elements_size;
 	size_t sub_elements_count;
-} VENG_Layout;
+} VENG_Childs;
 
 typedef struct VENG_Screen
 {
@@ -94,10 +121,18 @@ typedef struct VENG_Screen
 	char* title;
 	SDL_Surface* icon;
 	
-	VENG_Layout layout;
-
-	bool dirty;
+	VENG_Layer** layers;
+	size_t layers_size;
+	size_t layers_count;
 } VENG_Screen;
+
+typedef struct VENG_Layer
+{
+	VENG_ParentType type;
+
+	VENG_Layout layout;
+	VENG_Childs childs;
+} VENG_Layer;
 
 typedef struct VENG_Element
 {
@@ -110,8 +145,8 @@ typedef struct VENG_Element
 	bool visible;
 
 	bool dirty;
-
 	VENG_Layout layout;
+	VENG_Childs childs;
 } VENG_Element;
 
 // Start and finish
@@ -119,37 +154,40 @@ int VENG_Init(VENG_Driver driver);
 
 void VENG_Destroy(bool closeSDL);
 
-// Create
+// Creators
+VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers);
+
+VENG_Layer* VENG_CreateLayer(VENG_Layout layout, size_t max_elements);
+
+VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout, size_t max_sub_elements);
+
+VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical);
+
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer);
 
-VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, VENG_Layout layout);
+// Add
+void VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen);
 
-VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout);
-
-VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical, size_t max_childs);
-
-// Debug
-void VENG_PrintScreenHierarchy(VENG_Screen* screen);
-
-// Add 
-void VENG_AddElementToScreen(VENG_Element* element, VENG_Screen* screen);
+void VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer);
 
 void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
 
 // Prepare
 void VENG_PrepareScreen(VENG_Screen* screen);
 
-void VENG_PrepareChilds(void* parent_container, SDL_Rect drawing_rect);
+void VENG_PrepareLayer(VENG_Layer* layer);
 
-// Set
-void VENG_SetDriver(VENG_Driver driver);
-
-void VENG_SetScreen(VENG_Screen* screen);
+void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect);
 
 // Drawing
 SDL_Rect VENG_StartDrawing(VENG_Element* element);
 
 void VENG_StopDrawing(SDL_Rect* viewport);
+
+// Set
+void VENG_SetDriver(VENG_Driver driver);
+
+void VENG_SetScreen(VENG_Screen* screen);
 
 // Get
 SDL_Rect VENG_GetElementRect(VENG_Element* element);
@@ -159,6 +197,10 @@ SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element);
 VENG_Screen* VENG_GetScreen();
 
 VENG_Driver VENG_GetDriver();
+
+// Debug
+void VENG_PrintInternalHierarchy();
+void VENG_PrintScreenHierarchy(VENG_Screen* screen);
 
 /*==========================================================================*\
  *                    VENG_listeners.c - Input management 
