@@ -380,26 +380,29 @@ SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element)
 \*==========================================================================*/
 void VENG_PrepareScreen(VENG_Screen* screen)
 {
-	/*
 	if (screen == NULL)
 	{
 		return;
 	}
-	if (screen->childs.sub_elements == NULL || screen->childs.sub_elements_count == 0)
+	if (screen->layers == NULL || screen->layers_count == 0)
 	{
 		return;
 	}
-
-	int window_w;
-	int window_h;
-	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
-	VENG_PrepareChilds(screen, (SDL_Rect){0, 0, window_w, window_h});
-	*/
+	for (size_t i = 0; i < screen->layers_size; i++)
+	{
+		if (screen->layers[i] != NULL)
+		{
+			VENG_PrepareLayer(screen->layers[i]);
+		}
+	}
 }
 
 void VENG_PrepareLayer(VENG_Layer* layer)
 {
-
+	int window_w;
+	int window_h;
+	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
+	VENG_PrepareElements(layer, (SDL_Rect){0, 0, window_w, window_h});
 }
 
 void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
@@ -408,32 +411,34 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 	// (II) Once computed, align every child
 	// (III) Check if the childs have more childs
 	/*This is weird, isn't it?*/ 
-	/*
+	
+	// void* parent_container -----> layout & childs
+
 	if (parent_container == NULL)
 	{
 		return;
 	}
 
 	VENG_Layout* layout = NULL;
-	VENG_Childs* childs = NULL; // TORFDebug this
+	VENG_Childs* childs = NULL;
 	{
-		VENG_Screen* s = (VENG_Screen*)parent_container;
-		VENG_ParentType type = s->type;
-		if (type == VENG_TYPE_SCREEN)
+		VENG_Layer* data = (VENG_Layer*)parent_container;
+		VENG_ParentType type = data->type;
+		if (type == VENG_TYPE_LAYER)
 		{
-			VENG_Screen* scr = (VENG_Screen*)parent_container;
-			layout = &scr->layout;
-			childs = &scr->childs;
+			layout = &data->layout;
+			childs = &data->childs;
 		}
 		else if (type == VENG_TYPE_ELEMENT)
 		{
-			VENG_Element* ele = (VENG_Element*)parent_container;
-			layout = &ele->layout;
-			childs = &ele->childs;
+			VENG_Element* element = (VENG_Element*)parent_container;
+			layout = &element->layout;
+			childs = &element->childs;
 		}
 		else
 		{
-			printf("Something went wrong. ID = 936183");
+			printf("Invalid Parent_Container\n");
+			return;
 		}
 	}
 
@@ -543,7 +548,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 				}
 				offset.x += childs->sub_elements[i]->rect.w;
 				// (III)
-				VENG_PrepareChilds(childs->sub_elements[i], childs->sub_elements[i]->rect);
+				VENG_PrepareElements(childs->sub_elements[i], childs->sub_elements[i]->rect);
 			}
 		}
 	}
@@ -586,11 +591,10 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 				}
 				offset.y += childs->sub_elements[i]->rect.h;
 				// (III)
-				VENG_PrepareChilds(childs->sub_elements[i], childs->sub_elements[i]->rect);
+				VENG_PrepareElements(childs->sub_elements[i], childs->sub_elements[i]->rect);
 			}
 		}
 	}
-	*/
 }
 
 /*==========================================================================*\
@@ -690,23 +694,6 @@ void __PrintElementHierarchy (VENG_Element* element, size_t tabs)
 		}
 	}
 }
-
-/*
-#define ALLOCATED_SCREENS_START 10
-static VENG_Screen** screens = NULL;
-static size_t screens_current_slots = ALLOCATED_SCREENS_START;
-static size_t screens_used_slots = 0;
-
-#define ALLOCATED_LAYERS_START 20
-static VENG_Screen** layers = NULL;
-static size_t layers_current_slots = ALLOCATED_LAYERS_START;
-static size_t layers_used_slots = 0;
-
-#define ALLOCATED_ELEMENTS_START 100
-static VENG_Element** elements = NULL;
-static size_t elements_current_slots = ALLOCATED_ELEMENTS_START;
-static size_t elements_used_slots = 0;
-*/
 
 static void* IS_NULL(void *ptr) 
 {

@@ -34,11 +34,11 @@ int main (int argc, char* argv[])
 	VENG_Screen* screen = VENG_CreateScreen(TITLE, LoadPNG("res/Icon.png"), 2);
 	VENG_Layer* game = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_TOP), 2);
 	VENG_Layer* keyboard = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM), 2);
-	VENG_Element* g_element = VENG_CreateElement(1.0f, 0.7f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
-	VENG_Element* g_element2 = VENG_CreateElement(1.0f, 0.7f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
-	VENG_Element* k_element = VENG_CreateElement(1.0f, 0.8f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
-	VENG_Element* k_element2 = VENG_CreateElement(1.0f, 0.7f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER), 1);
-	VENG_Element* sub_element = VENG_CreateElement(0.5f, 0.5f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* g_element = VENG_CreateElement(0.5f, 0.5f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* g_element2 = VENG_CreateElement(0.5f, 0.5f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* k_element = VENG_CreateElement(0.5f, 0.5f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* k_element2 = VENG_CreateElement(0.5f, 0.5f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 1);
+	VENG_Element* sub_element = VENG_CreateElement(0.1f, 0.1f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
 
 	VENG_AddLayerToScreen(game, screen);
 	VENG_AddLayerToScreen(keyboard, screen);
@@ -52,12 +52,16 @@ int main (int argc, char* argv[])
 
 	VENG_PrintInternalHierarchy();
 	VENG_PrintScreenHierarchy(screen);
-	return 0;
 
+	VENG_SetScreen(screen);
+
+	printf("\n\n");
+
+	VENG_PrintScreenHierarchy(screen);
 
 	SDL_Event event;
 	int close_requested = 0;
-
+	
 	Uint64 time0 = SDL_GetTicks64();
 	int w;
 	int h;
@@ -75,10 +79,16 @@ int main (int argc, char* argv[])
 		}
 
 		SDL_RenderClear(renderer);
-
-		//VENG_PrepareScreen(screen);
 		
 		SDL_GetRendererOutputSize(renderer, &w, &h);
+
+		VENG_PrepareScreen(screen);
+
+		fill_a_rect_with_color(g_element, (SDL_Color){255, 143, 76, 255});
+		fill_a_rect_with_color(g_element2, (SDL_Color){255, 2, 98, 255});
+		fill_a_rect_with_color(k_element, (SDL_Color){255, 54, 245, 255});
+		fill_a_rect_with_color(k_element2, (SDL_Color){255, 255, 255, 255});
+		fill_a_rect_with_color(sub_element, (SDL_Color){255, 200, 200, 255});
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
