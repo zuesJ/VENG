@@ -31,24 +31,29 @@ int main (int argc, char* argv[])
 
 	VENG_Init(driver);
 	
-	VENG_Screen* main_screen = VENG_CreateScreen(TITLE, LoadPNG("res/Icon.png"), VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM, 3));
-	VENG_Element* element = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
-	VENG_Element* element2 = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER, 0));
-	VENG_Element* sub_element = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 1));
-	VENG_Element* sub_element2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
-	VENG_Element* test = VENG_CreateElement(0.2f, 0.3f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
+	VENG_Screen* screen = VENG_CreateScreen(TITLE, LoadPNG("res/Icon.png"), 2);
+	VENG_Layer* game = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_TOP), 2);
+	VENG_Layer* keyboard = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM), 2);
+	VENG_Element* g_element = VENG_CreateElement(1.0f, 0.7f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* g_element2 = VENG_CreateElement(1.0f, 0.7f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* k_element = VENG_CreateElement(1.0f, 0.8f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
+	VENG_Element* k_element2 = VENG_CreateElement(1.0f, 0.7f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER), 1);
+	VENG_Element* sub_element = VENG_CreateElement(0.5f, 0.5f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP), 0);
 
-	VENG_AddElementToScreen(element, main_screen);
-	VENG_AddElementToScreen(element2, main_screen);
-	//VENG_AddElementToScreen(test, main_screen);
-	//VENG_AddSubElementToElement(sub_element, element);
-	//VENG_AddSubElementToElement(sub_element2, sub_element);
-	VENG_SetScreen(main_screen);
+	VENG_AddLayerToScreen(game, screen);
+	VENG_AddLayerToScreen(keyboard, screen);
 
-	TTF_Font* comf = TTF_OpenFont("res/Comfortaa-Regular.ttf", 100);
-	Label lab = (Label){"Hi world", 200, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}};
+	VENG_AddElementToLayer(g_element, game);
+	VENG_AddElementToLayer(g_element2, game);
+	VENG_AddElementToLayer(k_element, keyboard);
+	VENG_AddElementToLayer(k_element2, keyboard);
 
-	VENG_PrintScreenHierarchy(main_screen);
+	VENG_AddSubElementToElement(sub_element, k_element2);
+
+	VENG_PrintInternalHierarchy();
+	VENG_PrintScreenHierarchy(screen);
+	return 0;
+
 
 	SDL_Event event;
 	int close_requested = 0;
@@ -71,17 +76,8 @@ int main (int argc, char* argv[])
 
 		SDL_RenderClear(renderer);
 
-		VENG_PrepareScreen(main_screen);
-		//VENG_PrintScreenHierarchy(main_screen);
-
-		draw_label (&lab, element, comf);
-		//fill_a_rect_with_color(element, (SDL_Color){255, 165, 100, 255});
-		fill_a_rect_with_color(element2, (SDL_Color){255, 12, 100, 255});
-		//fill_a_rect_with_color(sub_element, (SDL_Color){255, 255, 255, 255});
-		//fill_a_rect_with_color(sub_element2, (SDL_Color){255, 13, 67, 255});
-		//fill_a_rect_with_color(test, (SDL_Color){232, 13, 67, 255});
-
-
+		//VENG_PrepareScreen(screen);
+		
 		SDL_GetRendererOutputSize(renderer, &w, &h);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -159,3 +155,31 @@ static SDL_Surface* LoadPNG (const char* path)
 	}
 	return surface;
 }
+
+/*VENG_Element* element = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
+	VENG_Element* element2 = VENG_CreateElement(0.3f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_CENTER, 0));
+	VENG_Element* sub_element = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 1));
+	VENG_Element* sub_element2 = VENG_CreateElement(0.2f, 0.2f, true, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
+	VENG_Element* test = VENG_CreateElement(0.2f, 0.3f, false, true, VENG_CreateLayout(VENG_HORIZONTAL, VENG_LEFT, VENG_TOP, 0));
+
+	VENG_AddElementToScreen(element, main_screen);
+	VENG_AddElementToScreen(element2, main_screen);
+	//VENG_AddElementToScreen(test, main_screen);
+	//VENG_AddSubElementToElement(sub_element, element);
+	//VENG_AddSubElementToElement(sub_element2, sub_element);
+	VENG_SetScreen(main_screen);
+
+	TTF_Font* comf = TTF_OpenFont("res/Comfortaa-Regular.ttf", 100);
+	Label lab = (Label){"Hi world", 200, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 255}};
+
+	VENG_PrintScreenHierarchy(main_screen);
+	*/
+
+	//VENG_PrintScreenHierarchy(main_screen);
+
+	//draw_label (&lab, element, comf);
+	//fill_a_rect_with_color(element, (SDL_Color){255, 165, 100, 255});
+	//fill_a_rect_with_color(element2, (SDL_Color){255, 12, 100, 255});
+	//fill_a_rect_with_color(sub_element, (SDL_Color){255, 255, 255, 255});
+	//fill_a_rect_with_color(sub_element2, (SDL_Color){255, 13, 67, 255});
+	//fill_a_rect_with_color(test, (SDL_Color){232, 13, 67, 255});
