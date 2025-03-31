@@ -234,16 +234,4 @@ VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, boo
 
 void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call, VENG_MouseTrigger m_trigger);
 
-// Note: Keyboard detection is in a young phase. There are bugs.
-
-void VENG_AttachKeyboardBuffer(char* buffer, size_t buffer_size);
-
-void VENG_KeyboardStartListening();
-
-void VENG_KeyboardStopListening();
-
-bool VENG_KeyboardIsListening();
-
-void VENG_ResetListeners();
-
 #endif

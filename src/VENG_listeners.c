@@ -5,19 +5,14 @@
 
 #include "VENG.h"
 
-#define LISTENERS_STARTING_HEAP 50
-#define ENABLE_KEYBOARD_ALPHA false
+#define LISTENERS_STARTING_HEAP 1
 
-// Pointer safety macro
-#define IS_NULL(ptr) ((ptr) != NULL ? (ptr) : (printf("Pointer %s is NULL in line %d, %s.\n", #ptr, __LINE__, __FILE__), exit(1), NULL))
+// Pointer safety
+static void* IS_NULL(void *ptr);
 
 static VENG_MouseListener** mouse_listeners;
 static size_t mouse_listeners_size;
 static size_t mouse_listeners_capacity;
-
-static char* keyboard_buffer;
-static size_t keyboard_buffer_size;
-static bool listening_keyboard;
 
 static void check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event);
 static bool point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
@@ -112,40 +107,19 @@ VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, boo
 	return m_trigger;
 }
 
-void VENG_AttachKeyboardBuffer(char* buffer, size_t buffer_size)
-{
-	keyboard_buffer = buffer;
-	keyboard_buffer_size = buffer_size;
-	if (buffer == NULL)
-	{
-		keyboard_buffer_size = 0;
-	}
-}
-
-void VENG_KeyboardStartListening()
-{
-	listening_keyboard = true;
-	SDL_StartTextInput();
-}
-
-void VENG_KeyboardStopListening()
-{
-	listening_keyboard = false;
-	SDL_StopTextInput();
-}
-
-bool VENG_KeyboardIsListening()
-{
-	return listening_keyboard;
-}
-
 void VENG_ResetListeners()
 {
 	mouse_listeners = NULL;
 	mouse_listeners_size = 0;
 	mouse_listeners_capacity = 0;
+}
 
-	keyboard_buffer = NULL;
-	keyboard_buffer_size = 0;
-	listening_keyboard = false;
+static void* IS_NULL(void *ptr) 
+{
+    if (!ptr) 
+    {
+        printf("Pointer %p is NULL\n", ptr);
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
