@@ -166,16 +166,16 @@ VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_hor
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer);
 
 // Add
-void VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen);
+int VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen);
 
-void VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer);
+int VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer);
 
-void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
+int VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element);
 
 // Prepare
-void VENG_PrepareScreen(VENG_Screen* screen);
+int VENG_PrepareScreen(VENG_Screen* screen);
 
-void VENG_PrepareLayer(VENG_Layer* layer);
+int VENG_PrepareLayer(VENG_Layer* layer);
 
 void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect);
 
@@ -185,9 +185,9 @@ SDL_Rect VENG_StartDrawing(VENG_Element* element);
 void VENG_StopDrawing(SDL_Rect* viewport);
 
 // Set
-void VENG_SetDriver(VENG_Driver driver);
+int VENG_SetDriver(VENG_Driver driver);
 
-void VENG_SetScreen(VENG_Screen* screen);
+int VENG_SetScreen(VENG_Screen* screen);
 
 // Get
 SDL_Rect VENG_GetElementRect(VENG_Element* element);
@@ -198,9 +198,11 @@ VENG_Screen* VENG_GetScreen();
 
 VENG_Driver VENG_GetDriver();
 
+// Optimization
+
 // Debug
 void VENG_PrintInternalHierarchy();
-void VENG_PrintScreenHierarchy(VENG_Screen* screen);
+int VENG_PrintScreenHierarchy(VENG_Screen* screen);
 
 /*==========================================================================*\
  *                    VENG_listeners.c - Input management 

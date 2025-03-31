@@ -41,22 +41,22 @@ int VENG_Init (VENG_Driver new_driver)
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
 		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
-		return -1;
+		return 1;
 	}
 	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
 	int initted = IMG_Init(flags);
 	if ((initted & flags) != flags)
 	{
 		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
-		return -1;
+		return 1;
 	}
 	if (new_driver.window == NULL || new_driver.renderer == NULL)
 	{
 		printf("Driver contains NULL contents\n");
-		return -1;
+		return 1;
 	}
 
-	driver = new_driver;
+	VENG_SetDriver(new_driver);
 	
 	// Start heap
 	screens = IS_NULL(calloc(ALLOCATED_SCREENS_START, sizeof(VENG_Screen*)));
@@ -90,6 +90,12 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers
 	if (!started)
 	{
 		printf("VENG is not initialized yet\n");
+		return NULL;
+	}
+
+	if (title == NULL)
+	{
+		printf("title pointer is NULL\n");
 		return NULL;
 	}
 
@@ -235,6 +241,11 @@ VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_hor
 
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 {
+	if (window == NULL || renderer == NULL)
+	{
+		printf("Window or renderer cannot be NULL\n");
+		return (VENG_Driver){NULL, NULL};
+	}
 	VENG_Driver driver;
 	driver.window = window;
 	driver.renderer = renderer;
@@ -244,12 +255,17 @@ VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 /*==========================================================================*\
  *                   				Add
 \*==========================================================================*/
-void VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
+int VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 {
 	if (!started)
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
+	}
+	if (layer == NULL || screen == NULL)
+	{
+		printf("Layer or screen cannot be NULL\n");
+		return 1;
 	}
 	if (screen->layers == NULL)
 	{
@@ -259,7 +275,7 @@ void VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 	if (screen->layers_count >= screen->layers_size)
 	{
 		printf("Couldn't add Layer: max size reached\n");
-		return;
+		return 1;
 	}
 	for (size_t i = 0; i < screen->layers_size; i++)
 	{
@@ -270,14 +286,20 @@ void VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 			break;
 		}
 	}
+	return 0;
 }
 
-void VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
+int VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 {
 	if (!started)
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
+	}
+	if (element == NULL || layer == NULL)
+	{
+		printf("Element or layer cannot be NULL\n");
+		return 1;
 	}
 	if (layer->childs.sub_elements == NULL)
 	{
@@ -287,7 +309,7 @@ void VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 	if (layer->childs.sub_elements_count >= layer->childs.sub_elements_size)
 	{
 		printf("Couldn't add Element: max size reached\n");
-		return;
+		return 1;
 	}
 	for (size_t i = 0; i < layer->childs.sub_elements_size; i++)
 	{
@@ -298,14 +320,20 @@ void VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 			break;
 		}
 	}
+	return 0;
 }
 
-void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element)
+int VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element)
 {
 	if (!started)
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
+	}
+	if (sub_element == NULL || element == NULL)
+	{
+		printf("Sub_element or Element cannot be NULL\n");
+		return 1;
 	}
 	if (element->childs.sub_elements == NULL)
 	{
@@ -315,7 +343,7 @@ void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* elemen
 	if (element->childs.sub_elements_count >= element->childs.sub_elements_size)
 	{
 		printf("Couldn't add Element: max size reached\n");
-		return;
+		return 1;
 	}
 	for (size_t i = 0; i < element->childs.sub_elements_size; i++)
 	{
@@ -326,16 +354,17 @@ void VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* elemen
 			break;
 		}
 	}
+	return 0;
 }
 
 /*==========================================================================*\
  *                   				 Set
 \*==========================================================================*/
-void VENG_SetScreen(VENG_Screen* screen)
+int VENG_SetScreen(VENG_Screen* screen)
 {
 	if (screen == NULL)
 	{
-		return;
+		return 1;
 	}
 	rendering_screen = screen;
 	VENG_ResetListeners();
@@ -344,11 +373,17 @@ void VENG_SetScreen(VENG_Screen* screen)
 		SDL_SetWindowIcon(driver.window, screen->icon);
 	}
 	SDL_SetWindowTitle(driver.window, screen->title);
+	return 0;
 }
 
-void VENG_SetDriver(VENG_Driver new_driver)
+int VENG_SetDriver(VENG_Driver new_driver)
 {
+	if (new_driver.window == NULL || new_driver.renderer == NULL)
+	{
+		return 1;
+	}
 	driver = new_driver;
+	return 0;
 }
 
 /*==========================================================================*\
@@ -378,15 +413,16 @@ SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element)
 /*==========================================================================*\
  *                   			   Prepare
 \*==========================================================================*/
-void VENG_PrepareScreen(VENG_Screen* screen)
+int VENG_PrepareScreen(VENG_Screen* screen)
 {
 	if (screen == NULL)
 	{
-		return;
+		printf("Screen is NULL\n");
+		return 1;
 	}
 	if (screen->layers == NULL || screen->layers_count == 0)
 	{
-		return;
+		return 0;
 	}
 	for (size_t i = 0; i < screen->layers_size; i++)
 	{
@@ -395,14 +431,21 @@ void VENG_PrepareScreen(VENG_Screen* screen)
 			VENG_PrepareLayer(screen->layers[i]);
 		}
 	}
+	return 0;
 }
 
-void VENG_PrepareLayer(VENG_Layer* layer)
+int VENG_PrepareLayer(VENG_Layer* layer)
 {
+	if (layer == NULL)
+	{
+		printf("Layer is NULL");
+		return 1;
+	}
 	int window_w;
 	int window_h;
 	SDL_GetRendererOutputSize(driver.renderer, &window_w, &window_h);
 	VENG_PrepareElements(layer, (SDL_Rect){0, 0, window_w, window_h});
+	return 0;
 }
 
 void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
@@ -482,7 +525,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 				}
 			}
 		}
-	}
+	} 
 
 	// (II)
 	SDL_Point offset = (SDL_Point){0, 0};
@@ -602,6 +645,11 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 \*==========================================================================*/
 inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
+	if (element == NULL)
+	{
+		printf("Element is NULL\n");
+		return (SDL_Rect){-1, -1, -1, -1};
+	}
 	SDL_RenderSetViewport(driver.renderer, &element->rect);
 	SDL_Rect drawing_area = (SDL_Rect){0, 0, element->rect.w, element->rect.h};
 	return drawing_area;
@@ -611,6 +659,14 @@ inline void VENG_StopDrawing(SDL_Rect* viewport)
 {
 	SDL_RenderSetViewport(driver.renderer, viewport);
 }
+
+/*==========================================================================*\
+ *                   			 Optimization
+\*==========================================================================*/
+// An Element should be flagged as dirty if:
+//	- The screen dimentions got modified
+//	- The element 
+//	-
 
 /*==========================================================================*\
  *                   				Debug
@@ -635,9 +691,10 @@ void VENG_PrintInternalHierarchy()
 	}
 }
 
-void __PrintElementHierarchy (VENG_Element* element, size_t tabs);
-void VENG_PrintScreenHierarchy(VENG_Screen* screen)
+static int __PrintElementHierarchy (VENG_Element* element, size_t tabs);
+int VENG_PrintScreenHierarchy(VENG_Screen* screen)
 {
+	if (screen)
 	printf("Screen: %s ; IconPtr: %p ; l_ptr: %p ; l_size: %zd ; l_count: %zd ; type: %d\n", screen->title, screen->icon, screen->layers, screen->layers_size, screen->layers_count, screen->type);
 	for (size_t i = 0; i < screen->layers_size; i++)
 	{
@@ -658,14 +715,15 @@ void VENG_PrintScreenHierarchy(VENG_Screen* screen)
 			printf("\tLayer %ld: %p\n", i, screen->layers[i]);
 		}
 	}
+	return 0;
 }
 
-void __PrintElementHierarchy (VENG_Element* element, size_t tabs)
+int __PrintElementHierarchy (VENG_Element* element, size_t tabs)
 {
 	if (element == NULL)
 	{
 		printf("%p\n", element);
-		return;
+		return 1;
 	}
 	else
 	{
@@ -693,6 +751,7 @@ void __PrintElementHierarchy (VENG_Element* element, size_t tabs)
 			}
 		}
 	}
+	return 0;
 }
 
 static void* IS_NULL(void *ptr) 

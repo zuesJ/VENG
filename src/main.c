@@ -84,7 +84,7 @@ int main (int argc, char* argv[])
 
 		VENG_PrepareScreen(screen);
 
-		fill_a_rect_with_color(g_element, (SDL_Color){255, 143, 76, 255});
+		fill_a_rect_with_color(g_element, (SDL_Colorc){255, 143, 76, 255});
 		fill_a_rect_with_color(g_element2, (SDL_Color){255, 2, 98, 255});
 		fill_a_rect_with_color(k_element, (SDL_Color){255, 54, 245, 255});
 		fill_a_rect_with_color(k_element2, (SDL_Color){255, 255, 255, 255});
