@@ -34,6 +34,26 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 
+// Forward declarations (VENG.c)
+typedef enum VENG_ParentType VENG_ParentType;
+
+typedef enum VENG_Arrangement VENG_Arrangement;
+typedef enum VENG_Align VENG_Align;
+
+typedef struct VENG_Screen VENG_Screen;
+typedef struct VENG_Layer VENG_Layer;
+typedef struct VENG_Element VENG_Element;
+typedef struct VENG_Layout VENG_Layout;
+typedef struct VENG_Childs VENG_Childs;
+typedef struct VENG_Driver VENG_Driver;
+
+// Forward declarations (VENG_listeners.c)
+typedef struct VENG_Listeners VENG_Listeners;
+typedef struct VENG_Listener VENG_Listener;
+
+typedef void (*VENG_ListenerCallback)(VENG_Element* element, SDL_Event* event);
+typedef int (*VENG_ListenerCondition)(VENG_Element* element, SDL_Event* event); // If function returns 0, VENG will call the callback.
+
 /*==========================================================================*\
  *                   VENG.c - Core Functions, structs & enums
 \*==========================================================================*/
@@ -132,6 +152,8 @@ typedef struct VENG_Layer
 
 	VENG_Layout layout;
 	VENG_Childs childs;
+
+	VENG_Listeners* listeners;
 } VENG_Layer;
 
 typedef struct VENG_Element
@@ -201,6 +223,7 @@ VENG_Driver VENG_GetDriver();
 // Optimization
 
 // Debug
+bool VENG_HasStarted();
 void VENG_PrintInternalHierarchy();
 int VENG_PrintScreenHierarchy(VENG_Screen* screen);
 
@@ -208,30 +231,31 @@ int VENG_PrintScreenHierarchy(VENG_Screen* screen);
  *                    VENG_listeners.c - Input management 
 \*==========================================================================*/
 
-typedef void (*VENG_ListenerCallback)(VENG_Element* element, SDL_Event* event);
+//typedef void (*VENG_ListenerCallback)(VENG_Element* element, SDL_Event* event);
+//typedef int (*VENG_ListenerCondition)(VENG_Element* element, SDL_Event* event); // If function returns 0, VENG will call the callback.
 
-typedef struct VENG_MouseListener VENG_MouseListener;
-typedef struct VENG_MouseTrigger VENG_MouseTrigger;
-
-typedef struct VENG_MouseTrigger
+// Main
+typedef struct VENG_Listeners // Internal usage.
 {
-	bool m_motion;
-	bool m_button_down;
-	bool m_button_up;
-	bool m_wheel;
-} VENG_MouseTrigger;
+	VENG_Listener** listeners;
+	size_t listeners_size;
+	size_t listeners_count;
+} VENG_Listeners;
 
-typedef struct VENG_MouseListener
+typedef struct VENG_Listener
 {
+	SDL_EventType trigger;
+	VENG_ListenerCallback callback;
+	VENG_ListenerCondition condition;
 	VENG_Element* element;
-	VENG_ListenerCallback on_call;
-	VENG_MouseTrigger m_trigger;
-} VENG_MouseListener;
+} VENG_Listener;
 
-void VENG_Listen(SDL_Event event);
+int VENG_ListenScreen(SDL_Event* event, VENG_Screen* screen);
+int VENG_ListenLayer(SDL_Event* event, VENG_Layer* layer);
+int VENG_AddListenerToLayer(VENG_Listener* listener, VENG_Layer* layer);
+VENG_Listener* VENG_CreateListener(SDL_EventType trigger, VENG_ListenerCallback callback, VENG_ListenerCondition condition, VENG_Element* element);
 
-VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, bool m_button_up, bool m_wheel);
-
-void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call, VENG_MouseTrigger m_trigger);
+// Debug
+int VENG_PrintListenersInternalHierarchy();
 
 #endif

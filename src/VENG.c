@@ -71,7 +71,6 @@ void VENG_Destroy (bool closeSDL)
 {
 	driver = (VENG_Driver){NULL, NULL};
 	rendering_screen = NULL;
-	VENG_ResetListeners();
 	if (closeSDL)
 	{
 		IMG_Quit();
@@ -367,7 +366,6 @@ int VENG_SetScreen(VENG_Screen* screen)
 		return 1;
 	}
 	rendering_screen = screen;
-	VENG_ResetListeners();
 	if (screen->icon != NULL)
 	{
 		SDL_SetWindowIcon(driver.window, screen->icon);
@@ -671,6 +669,11 @@ inline void VENG_StopDrawing(SDL_Rect* viewport)
 /*==========================================================================*\
  *                   				Debug
 \*==========================================================================*/
+bool VENG_HasStarted()
+{
+	return started;
+}
+
 void VENG_PrintInternalHierarchy()
 {
 	printf("VENG: started:%db ; Driver: {w:%p r:%p} ; RenderingScreen: %p\n", started, driver.window, driver.renderer, rendering_screen);

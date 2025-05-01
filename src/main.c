@@ -50,14 +50,12 @@ int main (int argc, char* argv[])
 
 	VENG_AddSubElementToElement(sub_element, k_element2);
 
-	VENG_PrintInternalHierarchy();
-	VENG_PrintScreenHierarchy(screen);
+	//VENG_PrintInternalHierarchy();
+	//VENG_PrintScreenHierarchy(screen);
 
 	VENG_SetScreen(screen);
 
-	printf("\n\n");
-
-	VENG_PrintScreenHierarchy(screen);
+	VENG_PrintListenersInternalHierarchy();
 
 	SDL_Event event;
 	int close_requested = 0;
@@ -69,7 +67,7 @@ int main (int argc, char* argv[])
 	{
 		while (SDL_PollEvent(&event))
 		{	
-			VENG_Listen(event);
+			VENG_ListenScreen(&event, screen);
 			switch (event.type)
 			{
 				case SDL_QUIT:
@@ -84,7 +82,7 @@ int main (int argc, char* argv[])
 
 		VENG_PrepareScreen(screen);
 
-		fill_a_rect_with_color(g_element, (SDL_Colorc){255, 143, 76, 255});
+		fill_a_rect_with_color(g_element, (SDL_Color){255, 143, 76, 255});
 		fill_a_rect_with_color(g_element2, (SDL_Color){255, 2, 98, 255});
 		fill_a_rect_with_color(k_element, (SDL_Color){255, 54, 245, 255});
 		fill_a_rect_with_color(k_element2, (SDL_Color){255, 255, 255, 255});

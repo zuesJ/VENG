@@ -5,113 +5,148 @@
 
 #include "VENG.h"
 
-#define LISTENERS_STARTING_HEAP 1
-
 // Pointer safety
 static void* IS_NULL(void *ptr);
 
-static VENG_MouseListener** mouse_listeners;
-static size_t mouse_listeners_size;
-static size_t mouse_listeners_capacity;
+#define ALLOCATED_LISTENERS_START 1
+static VENG_Listeners** listeners = NULL;
+static size_t listeners_slots_size = ALLOCATED_LISTENERS_START;
+static size_t listeners_slots_count = 0;
 
-static void check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event);
-static bool point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect);
-
-void VENG_Listen(SDL_Event event)
+int VENG_ListenScreen(SDL_Event* event, VENG_Screen* screen)
 {
-	if (event.type == SDL_TEXTINPUT && ENABLE_KEYBOARD_ALPHA)
+	if (!VENG_HasStarted())
 	{
-		strcat(keyboard_buffer, event.text.text);
+		printf("Error, veng havent started\n");
+		return 1;
 	}
-	for (size_t i = 0; i < mouse_listeners_size; i++)
+	else if (event == NULL || screen == NULL)
 	{
-		if (mouse_listeners[i] != NULL)
-		{	
-			check_mouse_listener(mouse_listeners[i], &event);
-		}
+		printf("Error, NULL pointer in event or screen\n");
+		return 1;
 	}
-}
-
-static void check_mouse_listener(VENG_MouseListener* m_listener, SDL_Event* event)
-{
-	if (event->type == SDL_MOUSEMOTION && m_listener->m_trigger.m_motion)
+	else if (screen->layers == NULL || screen->layers_size == 0 || screen->layers_count == 0)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
+		printf("Warning: The screen given doesnt provide any layer\n");
+		return 0;
 	}
-	else if (event->type == SDL_MOUSEBUTTONDOWN && m_listener->m_trigger.m_button_down)
+	else if (listeners == NULL)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
+		listeners = IS_NULL(calloc(listeners_slots_size, sizeof(VENG_Listeners*)));
 	}
-	else if (event->type == SDL_MOUSEBUTTONUP && m_listener->m_trigger.m_button_up)
+	else if (listeners_slots_count >= listeners_slots_size)
 	{
-		point_is_on_rect(event->button.x, event->button.y, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
+		listeners_slots_size += ALLOCATED_LISTENERS_START;
+		listeners = IS_NULL(realloc(listeners, listeners_slots_size * sizeof(VENG_Listeners*)));
 	}
-	else if (event->type == SDL_MOUSEWHEEL && m_listener->m_trigger.m_wheel)
+	for (size_t i = 0; i < screen->layers_size; i++)
 	{
-		point_is_on_rect(event->wheel.mouseX, event->wheel.mouseY, m_listener->element->rect) ? m_listener->on_call(m_listener->element, event) : NULL;
-	}
-}
-
-static bool point_is_on_rect (Sint32 x, Sint32 y, SDL_Rect rect)
-{
-	if (x < rect.x || x >= rect.x + rect.w)
-	{
-		return false;
-	}
-	if (y < rect.y || y >= rect.y + rect.h)
-	{
-		return false;
-	}
-	return true;
-}
-
-void VENG_AddMouseListener(VENG_Element* element, VENG_ListenerCallback on_call, VENG_MouseTrigger m_trigger)
-{
-	if (mouse_listeners == NULL)
-	{
-		mouse_listeners_size = LISTENERS_STARTING_HEAP;
-		mouse_listeners = IS_NULL(calloc(mouse_listeners_size, sizeof(VENG_MouseListener)));
-		mouse_listeners_capacity = 0;
-	}
-	if (mouse_listeners_capacity >= mouse_listeners_size)
-	{
-		mouse_listeners_size += LISTENERS_STARTING_HEAP;
-		mouse_listeners = IS_NULL(realloc(mouse_listeners, mouse_listeners_size));
-		for (size_t i = mouse_listeners_size - LISTENERS_STARTING_HEAP; i < mouse_listeners_size; i++)
+		if (screen->layers[i] != NULL)
 		{
-			mouse_listeners[i] = NULL;
-		}
-	}	
-
-	for (size_t i = 0; i < mouse_listeners_size; i++)
-	{
-		if (mouse_listeners[i] == NULL)
-		{
-			mouse_listeners[i] = IS_NULL(calloc(1, sizeof(VENG_MouseListener)));	
-			mouse_listeners[i]->element = element;
-			mouse_listeners[i]->on_call = on_call;
-			mouse_listeners[i]->m_trigger = m_trigger;
-			mouse_listeners_capacity++;
-			break;
+			if (screen->layers[i]->listeners != NULL) VENG_ListenLayer(event, screen->layers[i]);
 		}
 	}
+	return 0;
 }
 
-VENG_MouseTrigger VENG_createMouseTrigger(bool m_motion, bool m_button_down, bool m_button_up, bool m_wheel)
+int VENG_ListenLayer(SDL_Event* event, VENG_Layer* layer)
 {
-	VENG_MouseTrigger m_trigger;
-	m_trigger.m_motion = m_motion;
-	m_trigger.m_button_down = m_button_down;
-	m_trigger.m_button_up = m_button_up;
-	m_trigger.m_wheel = m_wheel;
-	return m_trigger;
+	if (!VENG_HasStarted())
+	{
+		printf("Error, veng havent started\n");
+		return 1;
+	}
+	else if (event == NULL || layer == NULL)
+	{
+		printf("Error, NULL pointer in event or layer\n");
+		return 1;
+	}
+	else if (layer->listeners == NULL)
+	{
+		printf("Error: the layer doesnt have listeners\n");
+		return 1;
+	}
+	else if (layer->listeners->listeners == NULL || layer->listeners->listeners_size == 0 || layer->listeners->listeners_count == 0)
+	{
+		printf("Error: the layer doesnt have listeners\n");
+		return 1;
+	}
+	else if (listeners == NULL)
+	{
+		listeners = IS_NULL(calloc(listeners_slots_size, sizeof(VENG_Listeners*)));
+	}
+	else if (listeners_slots_count >= listeners_slots_size)
+	{
+		listeners_slots_size += ALLOCATED_LISTENERS_START;
+		listeners = IS_NULL(realloc(listeners, listeners_slots_size * sizeof(VENG_Listeners*)));
+	}
+	for (size_t i = 0; i < layer->listeners->listeners_size; i++)
+	{
+		if (layer->listeners->listeners[i] != NULL)
+		{
+			if (layer->listeners->listeners[i].condition == NULL)
+			{
+				layer->listeners->listeners[i].callback(layer->listeners->listeners[i].element, event);
+			}
+			else if (layer->listeners->listeners[i].condition(layer->listeners->listeners[i].element, event) == 0)
+			{
+				layer->listeners->listeners[i].callback(layer->listeners->listeners[i].element, event);
+			}
+		}
+	}
+	return 0;
 }
 
-void VENG_ResetListeners()
+int VENG_AddListenerToLayer(VENG_Listener listener, VENG_Layer* layer)
 {
-	mouse_listeners = NULL;
-	mouse_listeners_size = 0;
-	mouse_listeners_capacity = 0;
+	if (!VENG_HasStarted())
+	{
+		printf("Error, veng havent started\n");
+		return 1;
+	}
+	else if (layer == NULL)
+	{
+		printf("Layer is NULL\n");
+		return -1;		
+	}
+	
+	return 0;
+}
+
+VENG_Listener* VENG_CreateListener(SDL_EventType trigger, VENG_ListenerCallback callback, VENG_ListenerCondition condition, VENG_Element* element)
+{
+	if (!VENG_HasStarted())
+	{
+		printf("Error, veng havent started\n");
+		return (VENG_Listener){0};
+	}
+	else if (element == NULL)
+	{
+		printf("element cant be null\n");
+	}
+	VENG_Listener listener;
+	listener.trigger = trigger;
+	listener.callback = callback;
+	listener.condition = condition;
+	listener.element = element;
+	return &listener;
+}
+
+// Debug
+int VENG_PrintListenersInternalHierarchy()
+{
+	if (!VENG_HasStarted())
+	{
+		printf("Error, veng havent started\n");
+		return 1;
+	}
+	printf("VENG Listeners: %p ; size : %ld ; count : %ld\n", listeners, listeners_slots_size, listeners_slots_count);
+	if (listeners == NULL) return 0;
+	for (size_t i = 0; i < listeners_slots_size; i++)
+	{
+		printf("\tSlot %ld: %p\n", i, listeners[i]);
+	}
+	return 0;
 }
 
 static void* IS_NULL(void *ptr) 
