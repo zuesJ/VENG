@@ -257,5 +257,6 @@ VENG_Listener* VENG_CreateListener(SDL_EventType trigger, VENG_ListenerCallback 
 
 // Debug
 int VENG_PrintListenersInternalHierarchy();
+int VENG_PrintLayerListeners(VENG_Layer* layer);
 
 #endif

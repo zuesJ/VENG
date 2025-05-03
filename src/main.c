@@ -25,6 +25,23 @@ SDL_Window* window;
 SDL_Renderer* renderer;
 VENG_Driver driver;
 
+bool isMouseInside(SDL_Rect* rect, int mouseX, int mouseY);
+bool isMouseInside(SDL_Rect* rect, int mouseX, int mouseY) {
+    return mouseX >= rect->x &&
+           mouseX <  rect->x + rect->w &&
+           mouseY >= rect->y &&
+           mouseY <  rect->y + rect->h;
+}
+
+void callback(VENG_Element* element, SDL_Event* event);
+void callback(VENG_Element* element, SDL_Event* event)
+{
+	if (isMouseInside(&element->rect, event->button.x, event->button.y))
+	{
+		printf("Triggering!! %p %p\n", element, event);
+	}
+}
+
 int main (int argc, char* argv[])
 {
 	start_SDL();
@@ -53,9 +70,22 @@ int main (int argc, char* argv[])
 	//VENG_PrintInternalHierarchy();
 	//VENG_PrintScreenHierarchy(screen);
 
+
+	VENG_Listener* g_listener = VENG_CreateListener(SDL_MOUSEBUTTONDOWN, callback, NULL, g_element);
+	VENG_Listener* g_listener2 = VENG_CreateListener(SDL_MOUSEBUTTONDOWN, callback, NULL, k_element2);
+	VENG_AddListenerToLayer(g_listener, game);
+	VENG_AddListenerToLayer(g_listener2, keyboard);
+
 	VENG_SetScreen(screen);
 
+	VENG_PrintInternalHierarchy();
+	printf("\n");
+	VENG_PrintScreenHierarchy(screen);
+	printf("\n");
 	VENG_PrintListenersInternalHierarchy();
+	printf("\n");
+	VENG_PrintLayerListeners(game);
+	VENG_PrintLayerListeners(keyboard);
 
 	SDL_Event event;
 	int close_requested = 0;
@@ -70,6 +100,12 @@ int main (int argc, char* argv[])
 			VENG_ListenScreen(&event, screen);
 			switch (event.type)
 			{
+				case SDL_KEYUP:
+					printf("UPP\n");
+					break;
+				case SDL_KEYDOWN:
+					printf("DOWN\n");
+					break;
 				case SDL_QUIT:
 					close_requested = 1;
 					break;
