@@ -5,7 +5,7 @@
 
 #include "VENG.h"
 
-// Pointer safety 
+// Pointer safety  
 static void* IS_NULL(void *ptr);
 
 #define ALLOCATED_LISTENERS_START 1
