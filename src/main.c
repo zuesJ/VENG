@@ -47,7 +47,7 @@ int main (int argc, char* argv[])
 	start_SDL();
 
 	VENG_Init(driver);
-	
+
 	VENG_Screen* screen = VENG_CreateScreen(TITLE, LoadPNG("res/Icon.png"), 2);
 	VENG_Layer* game = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_TOP), 2);
 	VENG_Layer* keyboard = VENG_CreateLayer(VENG_CreateLayout(VENG_HORIZONTAL, VENG_CENTER, VENG_BOTTOM), 2);

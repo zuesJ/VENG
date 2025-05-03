@@ -20,18 +20,18 @@ static VENG_Screen* rendering_screen;
 
 #define ALLOCATED_SCREENS_START 1
 static VENG_Screen** screens = NULL;
-static size_t screens_current_slots = ALLOCATED_SCREENS_START;
-static size_t screens_used_slots = 0;
+static size_t screen_slots_size = ALLOCATED_SCREENS_START;
+static size_t screen_slots_count = 0;
 
 #define ALLOCATED_LAYERS_START 1
 static VENG_Layer** layers = NULL;
-static size_t layers_current_slots = ALLOCATED_LAYERS_START;
-static size_t layers_used_slots = 0;
+static size_t layer_slots_size = ALLOCATED_LAYERS_START;
+static size_t layer_slots_count = 0;
 
 #define ALLOCATED_ELEMENTS_START 1
 static VENG_Element** elements = NULL;
-static size_t elements_current_slots = ALLOCATED_ELEMENTS_START;
-static size_t elements_used_slots = 0;
+static size_t elements_slots_size = ALLOCATED_ELEMENTS_START;
+static size_t elements_slots_count = 0;
 
 /*==========================================================================*\
  *                   			Start and finish
@@ -55,7 +55,7 @@ int VENG_Init (VENG_Driver new_driver)
 		printf("Driver contains NULL contents\n");
 		return 1;
 	}
-
+	started = true;
 	VENG_SetDriver(new_driver);
 	
 	// Start heap
@@ -63,7 +63,6 @@ int VENG_Init (VENG_Driver new_driver)
 	layers = IS_NULL(calloc(ALLOCATED_LAYERS_START, sizeof(VENG_Layer*)));
 	elements = IS_NULL(calloc(ALLOCATED_ELEMENTS_START, sizeof(VENG_Element*)));
 
-	started = true;
 	return 0;
 }
 
@@ -105,19 +104,19 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers
 		return NULL;
 	}
 
-	if (screens_used_slots >= screens_current_slots)
+	if (screen_slots_count >= screen_slots_size)
 	{
-		screens_current_slots += ALLOCATED_SCREENS_START;
-		screens = (VENG_Screen**)IS_NULL(realloc(screens, screens_current_slots * sizeof(VENG_Screen*)));
+		screen_slots_size += ALLOCATED_SCREENS_START;
+		screens = (VENG_Screen**)IS_NULL(realloc(screens, screen_slots_size * sizeof(VENG_Screen*)));
 		// As realloc does not clear the new heap, it needs to be manually cleared
-		for (size_t i = screens_current_slots - ALLOCATED_SCREENS_START; i < screens_current_slots; i++)
+		for (size_t i = screen_slots_size - ALLOCATED_SCREENS_START; i < screen_slots_size; i++)
 		{
 			screens[i] = NULL;
 		}
 	}
 
 	VENG_Screen* return_adress;
-	for (size_t i = 0; i < screens_current_slots; i++)
+	for (size_t i = 0; i < screen_slots_size; i++)
 	{
 		if (screens[i] == NULL)
 		{
@@ -132,7 +131,7 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers
 			break;
 		}
 	}
-	screens_used_slots++;
+	screen_slots_count++;
 	return return_adress;
 }
 
@@ -150,19 +149,19 @@ VENG_Layer* VENG_CreateLayer(VENG_Layout layout, size_t max_elements)
 		return NULL;
 	}
 
-	if (layers_used_slots >= layers_current_slots)
+	if (layer_slots_count >= layer_slots_size)
 	{
-		layers_current_slots += ALLOCATED_LAYERS_START;
-		layers = (VENG_Layer**)IS_NULL(realloc(layers, layers_current_slots * sizeof(VENG_Layer*)));
+		layer_slots_size += ALLOCATED_LAYERS_START;
+		layers = (VENG_Layer**)IS_NULL(realloc(layers, layer_slots_size * sizeof(VENG_Layer*)));
 		// As realloc does not clear the new heap, it needs to be manually cleared
-		for (size_t i = layers_current_slots - ALLOCATED_LAYERS_START; i < layers_current_slots; i++)
+		for (size_t i = layer_slots_size - ALLOCATED_LAYERS_START; i < layer_slots_size; i++)
 		{
 			layers[i] = NULL;
 		}
 	}
 
 	VENG_Layer* return_adress;
-	for (size_t i = 0; i < layers_current_slots; i++)
+	for (size_t i = 0; i < layer_slots_size; i++)
 	{
 		if (layers[i] == NULL)
 		{
@@ -176,7 +175,7 @@ VENG_Layer* VENG_CreateLayer(VENG_Layout layout, size_t max_elements)
 			break;
 		}
 	}
-	layers_used_slots++;
+	layer_slots_count++;
 	return return_adress;
 }
 
@@ -188,18 +187,18 @@ VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visib
 		exit(EXIT_FAILURE);
 	}
 
-	if (elements_used_slots >= elements_current_slots)
+	if (elements_slots_count >= elements_slots_size)
 	{
-		elements_current_slots += ALLOCATED_ELEMENTS_START;
-		elements = (VENG_Element**)IS_NULL(realloc(elements, elements_current_slots * sizeof(VENG_Element*)));
-		for (size_t i = elements_current_slots - ALLOCATED_ELEMENTS_START; i < elements_current_slots; i++)
+		elements_slots_size += ALLOCATED_ELEMENTS_START;
+		elements = (VENG_Element**)IS_NULL(realloc(elements, elements_slots_size * sizeof(VENG_Element*)));
+		for (size_t i = elements_slots_size - ALLOCATED_ELEMENTS_START; i < elements_slots_size; i++)
 		{
 			elements[i] = NULL;
 		}
 	}
 
 	VENG_Element* return_adress;
-	for (size_t i = 0; i < elements_current_slots; i++)
+	for (size_t i = 0; i < elements_slots_size; i++)
 	{
 		if (elements[i] == NULL)
 		{
@@ -225,17 +224,12 @@ VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visib
 			break;
 		}
 	}
-	elements_used_slots++;
+	elements_slots_count++;
 	return return_adress;
 }
 
 VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical)
 {
-	if (!VENG_HasStarted())
-	{
-		printf("VENG is not initialized yet\n");
-		exit(EXIT_FAILURE);
-	}
 	VENG_Layout layout;
 	layout.arrangement = arrangement;
 	layout.align_horizontal = align_horizontal;
@@ -246,12 +240,7 @@ VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_hor
 
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 {
-	if (!VENG_HasStarted())
-	{
-		printf("VENG is not initialized yet\n");
-		exit(EXIT_FAILURE);
-	}
-	else if (window == NULL || renderer == NULL)
+	if (window == NULL || renderer == NULL)
 	{
 		printf("Window or renderer cannot be NULL\n");
 		return (VENG_Driver){NULL, NULL};
@@ -745,18 +734,18 @@ bool VENG_HasStarted()
 void VENG_PrintInternalHierarchy()
 {
 	printf("VENG: started:%db ; Driver: {w:%p r:%p} ; RenderingScreen: %p\n", started, driver.window, driver.renderer, rendering_screen);
-	printf("Screens: used: %ld ; total: %ld\n", screens_used_slots, screens_current_slots);
-	for (size_t i = 0; i < screens_current_slots; i++)
+	printf("Screens: used: %ld ; total: %ld\n", screen_slots_count, screen_slots_size);
+	for (size_t i = 0; i < screen_slots_size; i++)
 	{
 		printf("\tSlot %ld: %p\n", i, screens[i]);
 	}
-	printf("Layers: used: %ld ; total: %ld\n", layers_used_slots, layers_current_slots);
-	for (size_t i = 0; i < layers_current_slots; i++)
+	printf("Layers: used: %ld ; total: %ld\n", layer_slots_count, layer_slots_size);
+	for (size_t i = 0; i < layer_slots_size; i++)
 	{
 		printf("\tSlot %ld: %p\n", i, layers[i]);
 	}
-	printf("Elements: used: %ld ; total: %ld\n", elements_used_slots, elements_current_slots);
-	for (size_t i = 0; i < elements_current_slots; i++)
+	printf("Elements: used: %ld ; total: %ld\n", elements_slots_count, elements_slots_size);
+	for (size_t i = 0; i < elements_slots_size; i++)
 	{
 		printf("\tSlot %ld: %p\n", i, elements[i]);
 	}
