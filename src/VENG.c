@@ -69,6 +69,7 @@ int VENG_Init (VENG_Driver new_driver)
 
 void VENG_Destroy (bool closeSDL)
 {
+	if (!VENG_HasStarted()) return;
 	driver = (VENG_Driver){NULL, NULL};
 	rendering_screen = NULL;
 	if (closeSDL)
@@ -86,7 +87,7 @@ void VENG_Destroy (bool closeSDL)
 \*==========================================================================*/
 VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		return NULL;
@@ -137,7 +138,7 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers
 
 VENG_Layer* VENG_CreateLayer(VENG_Layout layout, size_t max_elements)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		return NULL;
@@ -181,7 +182,7 @@ VENG_Layer* VENG_CreateLayer(VENG_Layout layout, size_t max_elements)
 
 VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visible, VENG_Layout layout, size_t max_sub_elements)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
@@ -230,6 +231,11 @@ VENG_Element* VENG_CreateElement(float w, float h, bool stretch_size, bool visib
 
 VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_horizontal, VENG_Align align_vertical)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	VENG_Layout layout;
 	layout.arrangement = arrangement;
 	layout.align_horizontal = align_horizontal;
@@ -240,7 +246,12 @@ VENG_Layout VENG_CreateLayout(VENG_Arrangement arrangement, VENG_Align align_hor
 
 VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 {
-	if (window == NULL || renderer == NULL)
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
+	else if (window == NULL || renderer == NULL)
 	{
 		printf("Window or renderer cannot be NULL\n");
 		return (VENG_Driver){NULL, NULL};
@@ -256,7 +267,7 @@ VENG_Driver VENG_CreateDriver(SDL_Window* window, SDL_Renderer* renderer)
 \*==========================================================================*/
 int VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
@@ -290,7 +301,7 @@ int VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 
 int VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
@@ -324,12 +335,12 @@ int VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 
 int VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element)
 {
-	if (!started)
+	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		exit(EXIT_FAILURE);
 	}
-	if (sub_element == NULL || element == NULL)
+	else if (sub_element == NULL || element == NULL)
 	{
 		printf("Sub_element or Element cannot be NULL\n");
 		return 1;
@@ -361,6 +372,11 @@ int VENG_AddSubElementToElement(VENG_Element* sub_element, VENG_Element* element
 \*==========================================================================*/
 int VENG_SetScreen(VENG_Screen* screen)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	if (screen == NULL)
 	{
 		SDL_SetWindowTitle(driver.window, "VENG");
@@ -378,6 +394,11 @@ int VENG_SetScreen(VENG_Screen* screen)
 
 int VENG_SetDriver(VENG_Driver new_driver)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	if (new_driver.window == NULL || new_driver.renderer == NULL)
 	{
 		return 1;
@@ -391,21 +412,41 @@ int VENG_SetDriver(VENG_Driver new_driver)
 \*==========================================================================*/
 VENG_Screen* VENG_GetScreen()
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	return rendering_screen;
 }
 
 VENG_Driver VENG_GetDriver()
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	return driver;
 }
 
 SDL_Rect VENG_GetElementRect(VENG_Element* element)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	return element->rect;
 }
 
 SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	return &element->rect;
 }
 
@@ -415,6 +456,11 @@ SDL_Rect* VENG_GetElementRectPtr(VENG_Element* element)
 \*==========================================================================*/
 int VENG_PrepareScreen(VENG_Screen* screen)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	if (screen == NULL)
 	{
 		printf("Screen is NULL\n");
@@ -436,6 +482,11 @@ int VENG_PrepareScreen(VENG_Screen* screen)
 
 int VENG_PrepareLayer(VENG_Layer* layer)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	if (layer == NULL)
 	{
 		printf("Layer is NULL");
@@ -450,6 +501,11 @@ int VENG_PrepareLayer(VENG_Layer* layer)
 
 void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	// (I) Compute every child's size
 	// (II) Once computed, align every child
 	// (III) Check if the childs have more childs
@@ -645,6 +701,11 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 \*==========================================================================*/
 inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	if (element == NULL)
 	{
 		printf("Element is NULL\n");
@@ -657,6 +718,11 @@ inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 
 inline void VENG_StopDrawing(SDL_Rect* viewport)
 {
+	if (!VENG_HasStarted())
+	{
+		printf("VENG is not initialized yet\n");
+		exit(EXIT_FAILURE);
+	}
 	SDL_RenderSetViewport(driver.renderer, viewport);
 }
 
