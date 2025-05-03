@@ -363,7 +363,9 @@ int VENG_SetScreen(VENG_Screen* screen)
 {
 	if (screen == NULL)
 	{
-		return 1;
+		SDL_SetWindowTitle(driver.window, "VENG");
+		SDL_SetWindowIcon(driver.window, NULL);
+		return 0;
 	}
 	rendering_screen = screen;
 	if (screen->icon != NULL)
