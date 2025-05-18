@@ -225,7 +225,7 @@ typedef enum VENG_ParentType
 
 # Writing layouts (temporary)
 > Function explanation default fields (for writing the docs)
-### `(a cool return type) a cool function(with some cool parameters) without';'`
+### fun
 #### **Description**:
 #### **Parameters**:
 #### **Returns**:
