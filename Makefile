@@ -1,25 +1,8 @@
-CC = gcc
-CFLAGS = -Wall -Wextra #-Werror #-fPIC not necessary as it's a static lib
+all: build
 
-# Source and object files
-SRC = src/VENG.c src/VENG_listeners.c
-OBJ = $(SRC:.c=.o)
-
-LIBRARY = libVENG.a
-
-LIBS  = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
-
-# Targets
-all: $(LIBRARY)
-
-$(LIBRARY): $(OBJ)
-	ar rcs $(LIBRARY) $(OBJ)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
-
-app: $(LIBRARY) src/main.c src/main.h
-	$(CC) $(CFLAGS) src/main.c -o VENG -L ./ -lVENG $(LIBS)
-
-clean:
-	rm -f $(OBJ) $(LIBRARY)
+build: ./build
+	mkdir build
+	cd ./build && cmake .. && make
+	
+clear:
+	rm -r build
