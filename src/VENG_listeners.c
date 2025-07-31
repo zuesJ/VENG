@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "VENG.h"
+#include "VENG/VENG.h"
 
 // Pointer safety  
 static void* IS_NULL(void *ptr);

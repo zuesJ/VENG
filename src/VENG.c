@@ -11,7 +11,7 @@ static void* IS_NULL(void *ptr);
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "VENG.h"
+#include "VENG/VENG.h"
 
 static bool started = false;
 

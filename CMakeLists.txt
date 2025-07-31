@@ -10,7 +10,7 @@ add_library(VENG STATIC
 )
 
 target_include_directories(VENG PUBLIC
-    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(VENG
