@@ -609,7 +609,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 						childs->sub_elements[i]->rect.x = drawing_rect.x + offset.x;
 						break;
 					case VENG_CENTER:
-						childs->sub_elements[i]->rect.x = current_center.x;
+						childs->sub_elements[i]->rect.x = drawing_rect.x + current_center.x;
 						current_center.x += childs->sub_elements[i]->rect.w;
 						break;
 					case VENG_RIGHT:
@@ -667,7 +667,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 						childs->sub_elements[i]->rect.y = drawing_rect.y + offset.y;
 						break;
 					case VENG_CENTER:
-						childs->sub_elements[i]->rect.y = current_center.y;
+						childs->sub_elements[i]->rect.y = drawing_rect.y + current_center.y;
 						current_center.y += childs->sub_elements[i]->rect.h;
 						break;
 					case VENG_BOTTOM:
