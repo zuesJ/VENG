@@ -43,7 +43,7 @@ int VENG_Init(VENG_Driver new_driver)
 		printf("VENG has already started\n");
 		return 1;
 	}
-	if (new_driver.window == NULL || new_driver.renderer == NULL)
+	else if (new_driver.window == NULL || new_driver.renderer == NULL)
 	{
 		printf("Driver contains NULL contents\n");
 		return 1;
