@@ -38,18 +38,6 @@ static size_t elements_slots_count = 0;
 \*==========================================================================*/
 int VENG_Init (VENG_Driver new_driver)
 {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-	{
-		printf("The system has failed to initialize the subsystems: %s\n", SDL_GetError());
-		return 1;
-	}
-	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
-	int initted = IMG_Init(flags);
-	if ((initted & flags) != flags)
-	{
-		printf("The system has failed to initialize the image subsystem: %s\n", IMG_GetError());
-		return 1;
-	}
 	if (new_driver.window == NULL || new_driver.renderer == NULL)
 	{
 		printf("Driver contains NULL contents\n");
@@ -66,18 +54,11 @@ int VENG_Init (VENG_Driver new_driver)
 	return 0;
 }
 
-void VENG_Destroy (bool closeSDL)
+void VENG_Destroy ()
 {
 	if (!VENG_HasStarted()) return;
 	driver = (VENG_Driver){NULL, NULL};
 	rendering_screen = NULL;
-	if (closeSDL)
-	{
-		IMG_Quit();
-		SDL_DestroyRenderer(driver.renderer);
-		SDL_DestroyWindow(driver.window);
-		SDL_Quit();
-	}
 	started = false;
 }
 
@@ -91,14 +72,12 @@ VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers
 		printf("VENG is not initialized yet\n");
 		return NULL;
 	}
-
-	if (title == NULL)
+	else if (title == NULL)
 	{
 		printf("title pointer is NULL\n");
 		return NULL;
 	}
-
-	if (max_layers == 0)
+	else if (max_layers == 0)
 	{
 		printf("Max layers cannot be 0, the minimum is 1\n");
 		return NULL;

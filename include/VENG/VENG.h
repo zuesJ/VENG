@@ -154,7 +154,7 @@ typedef struct VENG_Element
 // Start and finish
 int VENG_Init(VENG_Driver driver);
 
-void VENG_Destroy(bool closeSDL);
+void VENG_Destroy();
 
 // Creators
 VENG_Screen* VENG_CreateScreen(char* title, SDL_Surface* icon, size_t max_layers);
