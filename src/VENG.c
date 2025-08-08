@@ -36,8 +36,13 @@ static size_t elements_slots_count = 0;
 /*==========================================================================*\
  *                   			Start and finish
 \*==========================================================================*/
-int VENG_Init (VENG_Driver new_driver)
+int VENG_Init(VENG_Driver new_driver)
 {
+	if (started)
+	{
+		printf("VENG has already started\n");
+		return 1;
+	}
 	if (new_driver.window == NULL || new_driver.renderer == NULL)
 	{
 		printf("Driver contains NULL contents\n");
@@ -54,7 +59,7 @@ int VENG_Init (VENG_Driver new_driver)
 	return 0;
 }
 
-void VENG_Destroy ()
+void VENG_Destroy()
 {
 	if (!VENG_HasStarted()) return;
 	driver = (VENG_Driver){NULL, NULL};
