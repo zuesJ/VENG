@@ -184,7 +184,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect);
 // Drawing
 SDL_Rect VENG_StartDrawing(VENG_Element* element);
 
-void VENG_StopDrawing(SDL_Rect* viewport);
+void VENG_StopDrawing(SDL_Rect* target);
 
 // Set
 int VENG_SetDriver(VENG_Driver driver);
@@ -238,5 +238,6 @@ VENG_Listener* VENG_CreateListener(SDL_EventType trigger, VENG_ListenerCallback 
 // Debug
 int VENG_PrintListenersInternalHierarchy();
 int VENG_PrintLayerListeners(VENG_Layer* layer);
+
 
 #endif
