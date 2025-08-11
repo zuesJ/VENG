@@ -696,19 +696,19 @@ inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 		printf("Element is NULL\n");
 		return (SDL_Rect){-1, -1, -1, -1};
 	}
-	SDL_RenderSetViewport(driver.renderer, &element->rect);
+	SDL_RenderSetClipRect(driver.renderer, &element->rect);
 	SDL_Rect drawing_area = (SDL_Rect){0, 0, element->rect.w, element->rect.h};
 	return drawing_area;
 }
 
-inline void VENG_StopDrawing(SDL_Rect* viewport)
+inline void VENG_StopDrawing(SDL_Rect* target)
 {
 	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
 		return;
 	}
-	SDL_RenderSetViewport(driver.renderer, viewport);
+	SDL_RenderSetClipRect(driver.renderer, target);
 }
 
 /*==========================================================================*\
@@ -818,4 +818,5 @@ static void* IS_NULL(void *ptr)
         exit(EXIT_FAILURE);
     }
     return ptr;
+
 }
