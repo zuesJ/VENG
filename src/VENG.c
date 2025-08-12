@@ -707,11 +707,6 @@ void VENG_StopDrawing(SDL_Rect* target)
 		printf("VENG is not initialized yet\n");
 		return;
 	}
-	else if (target == NULL)
-	{
-		printf("Target is NULL\n");
-		return;
-	}
 	SDL_RenderSetClipRect(driver.renderer, target);
 }
 
@@ -824,6 +819,7 @@ static void* IS_NULL(void *ptr)
     return ptr;
 
 }
+
 
 
 
