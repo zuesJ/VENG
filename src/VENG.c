@@ -684,7 +684,7 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 /*==========================================================================*\
  *                   				Drawing
 \*==========================================================================*/
-inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
+SDL_Rect VENG_StartDrawing(VENG_Element* element)
 {
 	if (!VENG_HasStarted())
 	{
@@ -701,7 +701,7 @@ inline SDL_Rect VENG_StartDrawing(VENG_Element* element)
 	return drawing_area;
 }
 
-inline void VENG_StopDrawing(SDL_Rect* target)
+void VENG_StopDrawing(SDL_Rect* target)
 {
 	if (!VENG_HasStarted())
 	{
@@ -820,3 +820,4 @@ static void* IS_NULL(void *ptr)
     return ptr;
 
 }
+
