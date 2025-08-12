@@ -697,8 +697,7 @@ SDL_Rect VENG_StartDrawing(VENG_Element* element)
 		return (SDL_Rect){-1, -1, -1, -1};
 	}
 	SDL_RenderSetClipRect(driver.renderer, &element->rect);
-	SDL_Rect drawing_area = (SDL_Rect){0, 0, element->rect.w, element->rect.h};
-	return drawing_area;
+	return element->rect;
 }
 
 void VENG_StopDrawing(SDL_Rect* target)
@@ -820,4 +819,5 @@ static void* IS_NULL(void *ptr)
     return ptr;
 
 }
+
 
