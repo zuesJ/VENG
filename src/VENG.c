@@ -246,7 +246,7 @@ int VENG_AddLayerToScreen(VENG_Layer* layer, VENG_Screen* screen)
 	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
-		return;
+		return 1;
 	}
 	if (layer == NULL || screen == NULL)
 	{
@@ -280,7 +280,7 @@ int VENG_AddElementToLayer(VENG_Element* element, VENG_Layer* layer)
 	if (!VENG_HasStarted())
 	{
 		printf("VENG is not initialized yet\n");
-		return 1:
+		return 1;
 	}
 	if (element == NULL || layer == NULL)
 	{
@@ -416,7 +416,7 @@ SDL_Rect VENG_GetElementRect(VENG_Element* element)
 	else if (element == NULL)
 	{
 		printf("Element is NULL\n");
-		return NULL;
+		return (SDL_Rect){0};
 	}
 	return element->rect;
 }
