@@ -15,10 +15,6 @@
 #include <stdbool.h>
 
 // Forward declarations (VENG.c)
-typedef enum VENG_ParentType VENG_ParentType;
-
-typedef enum VENG_Arrangement VENG_Arrangement;
-typedef enum VENG_Align VENG_Align;
 
 typedef struct VENG_Screen VENG_Screen;
 typedef struct VENG_Layer VENG_Layer;
@@ -56,20 +52,6 @@ typedef int (*VENG_ListenerCondition)(VENG_Element* element, SDL_Event* event); 
 //          ├- Element 2
 //          └- Element ...
 //
-
-
-typedef enum VENG_ParentType VENG_ParentType;
-
-typedef enum VENG_Arrangement VENG_Arrangement;
-typedef enum VENG_Align VENG_Align;
-
-typedef struct VENG_Screen VENG_Screen;
-typedef struct VENG_Layer VENG_Layer;
-typedef struct VENG_Element VENG_Element;
-typedef struct VENG_Layout VENG_Layout;
-typedef struct VENG_Childs VENG_Childs;
-
-typedef struct VENG_Driver VENG_Driver;
 
 typedef enum VENG_ParentType
 {
