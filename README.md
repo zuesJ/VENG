@@ -198,36 +198,3 @@ typedef enum VENG_ParentType
 
 
 ## 6. Util functions to Work with VENG:
-
-#
-
-#
-
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Writing layouts (temporary)
-> Function explanation default fields (for writing the docs)
-### fun
-#### **Description**:
-#### **Parameters**:
-#### **Returns**:
-#### **Usage**:
-#### **Notes**:

@@ -494,7 +494,6 @@ void VENG_PrepareElements(void* parent_container, SDL_Rect drawing_rect)
 	// (I) Compute every child's size
 	// (II) Once computed, align every child
 	// (III) Check if the childs have more childs
-	/*This is weird, isn't it?*/ 
 	
 	// void* parent_container -----> layout & childs
 
